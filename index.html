@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="pt-pt" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CH GELADAS | Premium Store</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Configuração Tailwind -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
+                    colors: {
+                        brand: {
+                            dark: '#020617',
+                            card: '#0f172a',
+                            primary: '#0ea5e9',
+                            secondary: '#3b82f6'
+                        }
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'glow': 'glow 2s ease-in-out infinite alternate',
+                    },
+                    keyframes: {
+                        float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-10px)' } },
+                        glow: { 'from': { boxShadow: '0 0 10px #0ea5e9' }, 'to': { boxShadow: '0 0 20px #0ea5e9, 0 0 10px #3b82f6' } }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { background-color: #020617; color: #f8fafc; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
+        
+        /* Efeitos de Vidro e Gradientes */
+        .glass { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(56, 189, 248, 0.1); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); }
+        .glass-heavy { background: rgba(2, 6, 23, 0.95); backdrop-filter: blur(24px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        
+        .gradient-text { background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+        .gradient-bg { background: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%); }
+        .gradient-bg-hover:hover { background: linear-gradient(135deg, #38bdf8 0%, #60a5fa 100%); box-shadow: 0 0 25px rgba(14, 165, 233, 0.4); }
+        
+        /* Utilitários */
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Notificações */
+        #toast-container { position: fixed; top: 24px; right: 24px; z-index: 10000; display: flex; flex-direction: column; gap: 12px; pointer-events: none; }
+        .toast { pointer-events: auto; transform: translateX(120%); transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        .toast.show { transform: translateX(0); }
+
+        /* Loader */
+        .loader { border: 3px solid rgba(14, 165, 233, 0.1); border-left-color: #0ea5e9; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="selection:bg-cyan-500/30">
+
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+
+    <!-- Verificação de Idade -->
+    <div id="age-modal" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#020617] p-4 transition-opacity duration-500">
+        <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1571613316887-6f8d5cbf7ef7?q=80&w=2071&auto=format&fit=crop')] bg-cover bg-center opacity-20"></div>
+        <div class="relative max-w-md w-full glass p-8 rounded-3xl border-t border-sky-500/20 shadow-2xl text-center backdrop-blur-xl">
+            <h2 class="text-4xl font-black mb-2 italic tracking-tighter">CH<span class="text-sky-400">GELADAS</span></h2>
+            <p class="text-slate-400 text-sm font-bold uppercase tracking-widest mb-8">Conteúdo para +18 anos</p>
+            <div class="space-y-3">
+                <button onclick="App.verifyAge()" class="w-full gradient-bg text-white font-bold py-4 rounded-xl hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-sky-500/20">SOU MAIOR DE 18 ANOS</button>
+                <button onclick="window.location.href='https://google.com'" class="w-full border border-slate-700 hover:bg-slate-800 text-slate-400 py-4 rounded-xl transition-all font-semibold">NÃO SOU</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="fixed top-0 w-full z-50 glass border-b-0 h-20 flex items-center transition-all duration-300" id="navbar">
+        <div class="container mx-auto px-4 md:px-6 flex justify-between items-center">
+            <div class="flex flex-col cursor-pointer group select-none" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+                <span class="text-2xl font-black italic uppercase leading-none tracking-tight group-hover:text-sky-300 transition-colors">CH<span class="text-sky-500">GELADAS</span></span>
+                <span class="text-[9px] uppercase tracking-[0.4em] text-sky-500/50 font-bold ml-0.5">Premium Store</span>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <button onclick="App.toggleAdmin()" class="p-2.5 rounded-full hover:bg-white/5 transition-all text-slate-500 hover:text-sky-400 active:scale-95" title="Área Admin">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                </button>
+                
+                <button onclick="App.toggleCart()" class="relative flex items-center gap-3 glass px-5 py-2.5 rounded-full border border-sky-500/20 hover:border-sky-400/50 hover:bg-sky-500/5 transition-all group active:scale-95">
+                    <svg class="w-5 h-5 text-sky-400 group-hover:text-sky-300 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 11h14l1 12H4l1-12z"/></svg>
+                    <span id="cart-badge" class="bg-sky-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full min-w-[20px] text-center shadow-lg shadow-sky-500/40">0</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Header -->
+    <header class="relative pt-32 pb-12 px-6 container mx-auto text-center md:text-left min-h-[50vh] flex flex-col justify-center">
+        <!-- Background Blobs -->
+        <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-sky-600/10 rounded-full blur-[120px] -z-10 pointer-events-none animate-pulse"></div>
+        <div class="absolute bottom-0 left-0 w-[300px] h-[300px] bg-blue-600/10 rounded-full blur-[100px] -z-10 pointer-events-none"></div>
+        
+        <h1 class="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter mb-8 leading-[0.95] text-white">
+            GELADA<br>
+            <span class="gradient-text italic">PREMIUM.</span>
+        </h1>
+        
+        <!-- Filtros Dinâmicos -->
+        <div class="flex flex-wrap justify-center md:justify-start gap-3 w-full overflow-x-auto pb-4 scrollbar-hide" id="category-filters">
+            <!-- Injetado via JS -->
+            <div class="h-10 w-24 bg-slate-800/50 rounded-full animate-pulse"></div>
+            <div class="h-10 w-24 bg-slate-800/50 rounded-full animate-pulse"></div>
+            <div class="h-10 w-24 bg-slate-800/50 rounded-full animate-pulse"></div>
+        </div>
+    </header>
+
+    <!-- Grid de Produtos -->
+    <main class="container mx-auto px-4 md:px-6 mb-32">
+        <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <!-- Skeleton Loading -->
+            <div class="col-span-full text-center py-20">
+                <div class="inline-block loader mb-4"></div>
+                <p class="text-slate-500 text-sm font-bold tracking-widest">CARREGANDO ADEGA...</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Painel ADMIN (Protegido) -->
+    <section id="admin-panel" class="hidden container mx-auto px-4 md:px-6 pb-24 animate-[fadeIn_0.5s_ease]">
+        <div class="border-t border-sky-500/10 pt-12">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+                <div>
+                    <h2 class="text-3xl font-black text-white flex items-center gap-3">
+                        <span class="w-3 h-3 bg-green-500 rounded-full animate-pulse shadow-[0_0_15px_#22c55e]"></span>
+                        GESTÃO
+                    </h2>
+                    <p class="text-slate-400 text-sm mt-1">Modo Firebase (Simulado em LocalStorage)</p>
+                </div>
+                <div class="flex gap-3">
+                    <button onclick="App.resetStore()" class="px-5 py-2.5 rounded-xl border border-sky-500/20 text-sky-400 hover:bg-sky-500/10 font-bold text-xs uppercase tracking-wider transition-all">Resetar Fábrica</button>
+                    <button onclick="App.logoutAdmin()" class="px-5 py-2.5 rounded-xl border border-red-500/20 text-red-400 hover:bg-red-500/10 font-bold text-xs uppercase tracking-wider transition-all">Sair</button>
+                </div>
+            </div>
+
+            <div class="grid lg:grid-cols-3 gap-8">
+                <!-- Formulário de Adição -->
+                <div class="lg:col-span-1 glass p-6 rounded-3xl h-fit sticky top-24">
+                    <h3 class="text-lg font-bold text-white mb-6 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        Novo Produto
+                    </h3>
+                    
+                    <div class="space-y-4">
+                        <div class="space-y-1">
+                            <label class="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Nome</label>
+                            <input type="text" id="adm-name" placeholder="Ex: Heineken 600ml" class="w-full bg-slate-900/80 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:border-sky-500 outline-none text-white transition-colors">
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="space-y-1">
+                                <label class="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Preço (R$)</label>
+                                <input type="number" id="adm-price" step="0.01" placeholder="0.00" class="w-full bg-slate-900/80 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:border-sky-500 outline-none text-white transition-colors">
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Categoria</label>
+                                <select id="adm-cat" class="w-full bg-slate-900/80 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:border-sky-500 outline-none text-slate-300 transition-colors">
+                                    <option value="Cervejas">Cervejas</option>
+                                    <option value="Destilados">Destilados</option>
+                                    <option value="Vinhos">Vinhos</option>
+                                    <option value="Sem Álcool">Sem Álcool</option>
+                                    <option value="Packs">Packs</option>
+                                    <option value="Petiscos">Petiscos</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="space-y-1">
+                            <label class="text-[10px] uppercase font-bold text-slate-500 tracking-wider">URL da Imagem</label>
+                            <input type="text" id="adm-img" placeholder="https://..." class="w-full bg-slate-900/80 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:border-sky-500 outline-none text-white transition-colors">
+                        </div>
+
+                        <button onclick="App.createProduct()" class="w-full gradient-bg text-white font-bold py-3.5 rounded-xl hover:shadow-lg hover:shadow-sky-500/20 active:scale-95 transition-all mt-4">CADASTRAR PRODUTO</button>
+                    </div>
+
+                    <!-- Config WhatsApp -->
+                    <div class="mt-8 pt-8 border-t border-white/5">
+                        <label class="text-[10px] uppercase font-bold text-slate-500 tracking-wider block mb-2">WhatsApp da Loja (Somente números)</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="adm-whatsapp" class="flex-1 bg-slate-900/80 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:border-green-500 outline-none text-white font-mono transition-colors">
+                            <button onclick="App.saveSettings()" class="bg-green-500/10 hover:bg-green-500 border border-green-500/20 hover:text-white text-green-500 rounded-xl px-4 transition-all">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lista de Produtos -->
+                <div class="lg:col-span-2 space-y-4">
+                    <h3 class="text-lg font-bold text-white flex items-center justify-between">
+                        <span>Inventário</span>
+                        <span class="text-xs bg-slate-800 text-slate-400 px-2 py-1 rounded-md" id="inventory-count">0 items</span>
+                    </h3>
+                    <div id="admin-list" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- Injetado via JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Drawer Carrinho -->
+    <div id="cart-drawer" class="fixed inset-y-0 right-0 w-full sm:w-[480px] bg-[#020617] z-[80] translate-x-full transition-transform duration-500 cubic-bezier(0.16, 1, 0.3, 1) shadow-2xl border-l border-sky-500/10 flex flex-col">
+        
+        <div class="p-6 border-b border-white/5 bg-sky-900/5 backdrop-blur-sm flex justify-between items-center">
+            <h2 class="text-xl font-black italic text-white">MEU <span class="text-sky-500">CESTO</span></h2>
+            <button onclick="App.toggleCart()" class="p-2 hover:bg-white/5 rounded-full text-slate-400 hover:text-white transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+
+        <div id="cart-items" class="flex-1 overflow-y-auto p-6 space-y-4 scrollbar-hide">
+            <!-- Items Injetados -->
+            <div class="flex flex-col items-center justify-center h-full opacity-30 gap-4">
+                <svg class="w-20 h-20 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 11h14l1 12H4l1-12z"/></svg>
+                <p class="font-bold uppercase tracking-widest text-slate-500">Seu cesto está vazio</p>
+            </div>
+        </div>
+
+        <div class="p-6 bg-[#050b1d] border-t border-white/5 space-y-4">
+            <div class="flex justify-between items-end">
+                <span class="text-xs text-slate-500 uppercase font-bold tracking-widest">Total Estimado</span>
+                <span id="cart-total" class="text-3xl font-black text-white tracking-tight">R$ 0,00</span>
+            </div>
+            <button onclick="App.checkout()" class="w-full gradient-bg gradient-bg-hover text-white font-black py-4 rounded-xl text-sm uppercase tracking-[0.15em] transition-all shadow-lg shadow-sky-500/20 flex items-center justify-center gap-3">
+                <span>Finalizar no WhatsApp</span>
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-8.68-2.031-.967-.272-.099-.47-.149-.669.198-.199.347-.769.967-.943 1.165-.173.199-.347.223-.644.074-.297-.149-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Backdrop Escuro -->
+    <div id="backdrop" onclick="App.toggleCart()" class="fixed inset-0 bg-black/60 z-[70] hidden backdrop-blur-[2px] opacity-0 transition-opacity duration-300"></div>
+
+    <!-- Modal Senha -->
+    <dialog id="password-modal" class="bg-transparent p-0 open:flex items-center justify-center fixed inset-0 z-[110] w-full h-full backdrop:bg-black/90 backdrop:backdrop-blur-sm hidden">
+        <form method="dialog" class="glass-heavy p-8 rounded-[2rem] w-full max-w-sm text-center border border-sky-500/20 relative overflow-hidden shadow-2xl">
+            <button onclick="document.getElementById('password-modal').close()" type="button" class="absolute top-4 right-4 text-slate-500 hover:text-white transition-colors"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2"/></svg></button>
+            
+            <div class="w-16 h-16 bg-gradient-to-br from-sky-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-sky-500/30">
+                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+            </div>
+            
+            <h3 class="text-xl font-bold text-white mb-2">Área Restrita</h3>
+            <p class="text-slate-400 text-xs mb-6 px-4">Acesso exclusivo para gerência da CH Geladas.</p>
+            
+            <input type="password" id="pass-input" placeholder="DIGITE A SENHA" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 mb-4 text-center text-white outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 font-bold tracking-[0.2em] transition-all placeholder-slate-700">
+            <button type="button" onclick="App.verifyLogin()" class="w-full gradient-bg text-white font-bold py-3.5 rounded-xl hover:scale-[1.02] active:scale-95 transition-all text-sm uppercase tracking-wider shadow-lg shadow-sky-500/20">Acessar Painel</button>
+        </form>
+    </dialog>
+
+    <script>
+        /**
+         * ------------------------------------------------------------------
+         * CAMADA DE SERVIÇO DE DADOS (DATA LAYER)
+         * ------------------------------------------------------------------
+         * Estruturado para simular o Firebase Firestore.
+         * Quando quiser migrar, altere apenas esta classe 'DataService'.
+         */
+        const DB_COLLECTIONS = {
+            PRODUCTS: 'ch_products_v2',
+            SETTINGS: 'ch_settings_v2'
+        };
+
+        const DataService = {
+            // Simula collection(db, name)
+            async getCollection(collectionName) {
+                // Simula latência de rede (opcional, para realismo)
+                // await new Promise(r => setTimeout(r, 300)); 
+                const data = localStorage.getItem(collectionName);
+                return data ? JSON.parse(data) : [];
+            },
+
+            // Simula setDoc / addDoc
+            async saveDocument(collectionName, docData) {
+                const currentData = await this.getCollection(collectionName);
+                
+                // Se for array (coleção de produtos)
+                if (Array.isArray(currentData)) {
+                    const index = currentData.findIndex(d => d.id === docData.id);
+                    if (index >= 0) {
+                        currentData[index] = { ...currentData[index], ...docData, updatedAt: Date.now() };
+                    } else {
+                        currentData.push({ ...docData, createdAt: Date.now() });
+                    }
+                    localStorage.setItem(collectionName, JSON.stringify(currentData));
+                } 
+                // Se for objeto único (settings)
+                else {
+                    const newData = { ...currentData, ...docData };
+                    localStorage.setItem(collectionName, JSON.stringify(newData));
+                }
+                return docData;
+            },
+
+            // Simula deleteDoc
+            async deleteDocument(collectionName, docId) {
+                const currentData = await this.getCollection(collectionName);
+                if (Array.isArray(currentData)) {
+                    const newData = currentData.filter(d => d.id !== docId);
+                    localStorage.setItem(collectionName, JSON.stringify(newData));
+                }
+            },
+
+            // Inicialização (Seed)
+            async initSeed() {
+                const hasData = localStorage.getItem(DB_COLLECTIONS.PRODUCTS);
+                if (!hasData) {
+                    const initialProducts = [
+                        { id: crypto.randomUUID(), name: "Heineken 330ml", price: 6.50, category: "Cervejas", img: "https://images.unsplash.com/photo-1618183182848-7076a54160a0?auto=format&fit=crop&w=500" },
+                        { id: crypto.randomUUID(), name: "Corona Extra", price: 8.00, category: "Cervejas", img: "https://images.unsplash.com/photo-1629205626372-d59663d86789?auto=format&fit=crop&w=500" },
+                        { id: crypto.randomUUID(), name: "Absolut Vodka", price: 89.90, category: "Destilados", img: "https://images.unsplash.com/photo-1613243555988-441166d4d6fd?auto=format&fit=crop&w=500" },
+                        { id: crypto.randomUUID(), name: "Coca-Cola Lata", price: 5.00, category: "Sem Álcool", img: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=500" },
+                        { id: crypto.randomUUID(), name: "Combo Gin Tanqueray", price: 150.00, category: "Packs", img: "https://images.unsplash.com/photo-1597075687490-8f673c6c17f6?auto=format&fit=crop&w=500" }
+                    ];
+                    localStorage.setItem(DB_COLLECTIONS.PRODUCTS, JSON.stringify(initialProducts));
+                    
+                    const initialConfig = { whatsapp: "5511999999999" };
+                    localStorage.setItem(DB_COLLECTIONS.SETTINGS, JSON.stringify(initialConfig));
+                }
+            }
+        };
+
+        /**
+         * ------------------------------------------------------------------
+         * LÓGICA DA APLICAÇÃO (CONTROLLER)
+         * ------------------------------------------------------------------
+         */
+        const App = {
+            state: {
+                products: [],
+                cart: [], // Sessão apenas (como pedido)
+                config: {},
+                activeFilter: 'Todas',
+                isAdmin: false
+            },
+
+            async init() {
+                await DataService.initSeed();
+                await this.refreshData();
+                
+                // Verifica autenticação admin persistida na sessão
+                if (sessionStorage.getItem('ch_admin_session')) {
+                    this.state.isAdmin = true;
+                    this.renderAdmin();
+                }
+
+                // Verifica idade
+                if (!localStorage.getItem('ch_age_verified_v2')) {
+                    document.getElementById('age-modal').classList.remove('hidden');
+                } else {
+                    document.getElementById('age-modal').classList.add('hidden');
+                }
+
+                this.renderStore();
+            },
+
+            async refreshData() {
+                this.state.products = await DataService.getCollection(DB_COLLECTIONS.PRODUCTS);
+                this.state.config = await DataService.getCollection(DB_COLLECTIONS.SETTINGS) || { whatsapp: '5511999999999' };
+            },
+
+            // --- Ações de Carrinho ---
+            addToCart(productId) {
+                const product = this.state.products.find(p => p.id === productId);
+                if (!product) return;
+
+                const existing = this.state.cart.find(i => i.id === productId);
+                if (existing) {
+                    existing.qty++;
+                } else {
+                    this.state.cart.push({ ...product, qty: 1 });
+                }
+                
+                this.renderCart();
+                this.showToast(`+1 ${product.name} adicionado!`);
+                
+                // Abre o carrinho automaticamente na primeira adição
+                if (this.state.cart.length === 1 && existing === undefined) {
+                    this.toggleCart();
+                }
+            },
+
+            changeQty(index, delta) {
+                const item = this.state.cart[index];
+                item.qty += delta;
+                if (item.qty <= 0) this.state.cart.splice(index, 1);
+                this.renderCart();
+            },
+
+            toggleCart() {
+                const drawer = document.getElementById('cart-drawer');
+                const backdrop = document.getElementById('backdrop');
+                const isHidden = drawer.classList.contains('translate-x-full');
+
+                if (isHidden) {
+                    drawer.classList.remove('translate-x-full');
+                    backdrop.classList.remove('hidden');
+                    setTimeout(() => backdrop.classList.remove('opacity-0'), 10);
+                    document.body.style.overflow = 'hidden'; // Previne scroll no body
+                } else {
+                    drawer.classList.add('translate-x-full');
+                    backdrop.classList.add('opacity-0');
+                    setTimeout(() => backdrop.classList.add('hidden'), 300);
+                    document.body.style.overflow = 'auto';
+                }
+            },
+
+            checkout() {
+                if (this.state.cart.length === 0) return this.showToast("Cesto vazio!", "error");
+                
+                const total = this.state.cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
+                let text = `🧊 *PEDIDO CH GELADAS*%0A%0A`;
+                
+                this.state.cart.forEach(item => {
+                    text += `▪ ${item.qty}x *${item.name}* (R$ ${(item.price * item.qty).toFixed(2)})%0A`;
+                });
+                
+                text += `%0A💰 *TOTAL: R$ ${total.toFixed(2).replace('.', ',')}*%0A%0A📍 *Aguardo confirmação do pedido.*`;
+                
+                const phone = this.state.config.whatsapp || "5511999999999";
+                window.open(`https://wa.me/${phone}?text=${text}`, '_blank');
+            },
+
+            // --- Ações de UI ---
+            setFilter(category) {
+                this.state.activeFilter = category;
+                this.renderStore();
+            },
+
+            verifyAge() {
+                localStorage.setItem('ch_age_verified_v2', 'true');
+                document.getElementById('age-modal').classList.add('opacity-0', 'pointer-events-none');
+                setTimeout(() => document.getElementById('age-modal').remove(), 500);
+            },
+
+            toggleAdmin() {
+                if (this.state.isAdmin) {
+                    document.getElementById('admin-panel').classList.remove('hidden');
+                    document.getElementById('admin-panel').scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    document.getElementById('password-modal').classList.remove('hidden');
+                    document.getElementById('password-modal').showModal();
+                }
+            },
+
+            verifyLogin() {
+                const pass = document.getElementById('pass-input').value;
+                if (pass === '@marianeecleiton') {
+                    this.state.isAdmin = true;
+                    sessionStorage.setItem('ch_admin_session', 'true');
+                    document.getElementById('password-modal').close();
+                    document.getElementById('password-modal').classList.add('hidden');
+                    this.renderAdmin();
+                    this.showToast("Acesso Admin Concedido 🔓");
+                    setTimeout(() => this.toggleAdmin(), 500);
+                } else {
+                    this.showToast("Senha Incorreta", "error");
+                    document.getElementById('pass-input').value = '';
+                }
+            },
+
+            logoutAdmin() {
+                this.state.isAdmin = false;
+                sessionStorage.removeItem('ch_admin_session');
+                location.reload();
+            },
+
+            // --- Ações de Dados (Admin) ---
+            async createProduct() {
+                const name = document.getElementById('adm-name').value;
+                const price = parseFloat(document.getElementById('adm-price').value);
+                const category = document.getElementById('adm-cat').value;
+                const img = document.getElementById('adm-img').value;
+
+                if (!name || isNaN(price)) return this.showToast("Preencha os dados obrigatórios", "error");
+
+                const newProduct = {
+                    id: crypto.randomUUID(),
+                    name,
+                    price,
+                    category,
+                    img: img || "https://images.unsplash.com/photo-1629205626372-d59663d86789?auto=format&fit=crop&w=500"
+                };
+
+                await DataService.saveDocument(DB_COLLECTIONS.PRODUCTS, newProduct);
+                await this.refreshData();
+                this.renderStore();
+                this.renderAdmin();
+                this.showToast("Produto criado com sucesso!");
+                
+                // Limpa campos
+                document.getElementById('adm-name').value = '';
+                document.getElementById('adm-price').value = '';
+                document.getElementById('adm-img').value = '';
+            },
+
+            async deleteProduct(id) {
+                if (!confirm("Remover este item permanentemente?")) return;
+                await DataService.deleteDocument(DB_COLLECTIONS.PRODUCTS, id);
+                await this.refreshData();
+                this.renderStore();
+                this.renderAdmin();
+                this.showToast("Produto removido.");
+            },
+
+            async saveSettings() {
+                const whatsapp = document.getElementById('adm-whatsapp').value;
+                if (!whatsapp) return;
+                
+                await DataService.saveDocument(DB_COLLECTIONS.SETTINGS, { whatsapp });
+                await this.refreshData();
+                this.showToast("Configurações salvas!");
+            },
+
+            resetStore() {
+                if (confirm("ATENÇÃO: Isso apagará todos os produtos personalizados. Continuar?")) {
+                    localStorage.removeItem(DB_COLLECTIONS.PRODUCTS);
+                    localStorage.removeItem(DB_COLLECTIONS.SETTINGS);
+                    location.reload();
+                }
+            },
+
+            // --- Renderização ---
+            renderStore() {
+                // 1. Filtros
+                const categories = ['Todas', ...new Set(this.state.products.map(p => p.category))];
+                const filtersHtml = categories.map(cat => `
+                    <button onclick="App.setFilter('${cat}')" 
+                        class="px-6 py-2 rounded-full text-[11px] uppercase tracking-widest font-bold transition-all border whitespace-nowrap
+                        ${this.state.activeFilter === cat 
+                            ? 'bg-sky-500 text-white border-sky-500 shadow-lg shadow-sky-500/30 scale-105' 
+                            : 'bg-slate-900/50 text-slate-400 border-white/5 hover:border-sky-500/30 hover:text-white'}">
+                        ${cat}
+                    </button>
+                `).join('');
+                document.getElementById('category-filters').innerHTML = filtersHtml;
+
+                // 2. Produtos
+                const filtered = this.state.activeFilter === 'Todas' 
+                    ? this.state.products 
+                    : this.state.products.filter(p => p.category === this.state.activeFilter);
+
+                const grid = document.getElementById('products-grid');
+                
+                if (filtered.length === 0) {
+                    grid.innerHTML = `<div class="col-span-full py-20 flex flex-col items-center justify-center opacity-40">
+                        <p class="text-sm font-bold uppercase tracking-widest text-slate-400">Nenhum item encontrado</p>
+                    </div>`;
+                    return;
+                }
+
+                grid.innerHTML = filtered.map(p => `
+                    <div class="group relative bg-[#0f172a] rounded-[2rem] border border-white/5 overflow-hidden hover:border-sky-500/30 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-sky-500/10">
+                        <div class="h-64 overflow-hidden relative">
+                            <img src="${p.img}" onerror="this.src='https://placehold.co/600x400/1e293b/FFF?text=Sem+Imagem'" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-80 group-hover:opacity-100">
+                            <div class="absolute inset-0 bg-gradient-to-t from-[#0f172a] via-transparent to-transparent opacity-90"></div>
+                            <div class="absolute top-4 left-4 bg-sky-500/20 backdrop-blur-md border border-sky-500/20 text-sky-300 text-[9px] font-black px-3 py-1.5 rounded-lg uppercase tracking-wider">
+                                ${p.category}
+                            </div>
+                        </div>
+                        <div class="p-6 relative -mt-12 z-10">
+                            <h3 class="text-lg font-bold text-white leading-tight mb-2 min-h-[3rem] text-shadow-sm">${p.name}</h3>
+                            <div class="flex justify-between items-end border-t border-white/5 pt-4 mt-2">
+                                <div>
+                                    <span class="text-[10px] text-slate-500 block uppercase font-bold tracking-wider mb-0.5">Valor Unitário</span>
+                                    <span class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400">R$ ${p.price.toFixed(2).replace('.', ',')}</span>
+                                </div>
+                                <button onclick="App.addToCart('${p.id}')" class="w-12 h-12 rounded-xl bg-sky-500 text-white flex items-center justify-center shadow-lg shadow-sky-500/20 hover:bg-sky-400 active:scale-95 transition-all hover:rotate-3">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            },
+
+            renderCart() {
+                const container = document.getElementById('cart-items');
+                const badge = document.getElementById('cart-badge');
+                
+                const totalQty = this.state.cart.reduce((a, b) => a + b.qty, 0);
+                const totalPrice = this.state.cart.reduce((a, b) => a + (b.price * b.qty), 0);
+                
+                badge.innerText = totalQty;
+                badge.classList.toggle('opacity-0', totalQty === 0);
+                document.getElementById('cart-total').innerText = `R$ ${totalPrice.toFixed(2).replace('.', ',')}`;
+
+                if (this.state.cart.length === 0) {
+                    container.innerHTML = `
+                        <div class="flex flex-col items-center justify-center h-full opacity-30 gap-4">
+                            <svg class="w-20 h-20 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 11h14l1 12H4l1-12z"/></svg>
+                            <p class="font-bold uppercase tracking-widest text-slate-500">Seu cesto está vazio</p>
+                        </div>`;
+                    return;
+                }
+
+                container.innerHTML = this.state.cart.map((item, idx) => `
+                    <div class="flex gap-4 items-center bg-slate-900/40 p-3 rounded-2xl border border-white/5 hover:border-sky-500/20 transition-colors animate-[fadeIn_0.3s_ease]">
+                        <div class="w-16 h-16 rounded-xl overflow-hidden bg-slate-800 flex-shrink-0 relative">
+                            <img src="${item.img}" class="w-full h-full object-cover opacity-80">
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h4 class="font-bold text-sm text-white truncate pr-2">${item.name}</h4>
+                            <p class="text-xs text-sky-400 font-mono mt-0.5">R$ ${(item.price * item.qty).toFixed(2)}</p>
+                        </div>
+                        <div class="flex items-center gap-3 bg-slate-950 rounded-lg p-1 border border-white/5">
+                            <button onclick="App.changeQty(${idx}, -1)" class="w-6 h-6 rounded flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10">-</button>
+                            <span class="text-xs font-bold w-4 text-center">${item.qty}</span>
+                            <button onclick="App.changeQty(${idx}, 1)" class="w-6 h-6 rounded flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10">+</button>
+                        </div>
+                    </div>
+                `).join('');
+            },
+
+            renderAdmin() {
+                const list = document.getElementById('admin-list');
+                document.getElementById('admin-panel').classList.remove('hidden');
+                document.getElementById('adm-whatsapp').value = this.state.config.whatsapp || '';
+                document.getElementById('inventory-count').innerText = `${this.state.products.length} itens`;
+
+                list.innerHTML = this.state.products.map(p => `
+                    <div class="flex items-center justify-between glass p-3 rounded-xl border border-white/5 group">
+                        <div class="flex items-center gap-3">
+                            <img src="${p.img}" class="w-10 h-10 rounded-lg object-cover bg-slate-800 grayscale group-hover:grayscale-0 transition-all">
+                            <div class="leading-tight">
+                                <p class="font-bold text-xs text-white group-hover:text-sky-300 transition-colors">${p.name}</p>
+                                <p class="text-[10px] text-slate-500 uppercase tracking-wider">${p.category}</p>
+                            </div>
+                        </div>
+                        <button onclick="App.deleteProduct('${p.id}')" class="w-8 h-8 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white flex items-center justify-center transition-all">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                        </button>
+                    </div>
+                `).join('');
+            },
+
+            showToast(msg, type = 'success') {
+                const container = document.getElementById('toast-container');
+                const toast = document.createElement('div');
+                
+                const styles = type === 'success' 
+                    ? 'border-l-4 border-green-500 bg-slate-900/95 text-white' 
+                    : 'border-l-4 border-red-500 bg-slate-900/95 text-white';
+                
+                toast.className = `toast p-4 rounded-lg shadow-2xl flex items-center gap-3 min-w-[300px] backdrop-blur-md ${styles}`;
+                toast.innerHTML = `
+                    <span class="font-bold text-sm">${msg}</span>
+                `;
+                
+                container.appendChild(toast);
+                requestAnimationFrame(() => toast.classList.add('show'));
+                
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    setTimeout(() => toast.remove(), 500);
+                }, 3000);
+            }
+        };
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', () => {
+            App.init();
+        });
+    </script>
+</body>
+</html>
