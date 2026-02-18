@@ -1,680 +1,1555 @@
 <!DOCTYPE html>
-<html lang="pt-pt" class="scroll-smooth">
+<html lang="pt-BR" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CH GELADAS | Premium Store</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-    
-    <!-- Configuração Tailwind -->
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
-                    colors: {
-                        brand: {
-                            dark: '#020617',
-                            card: '#0f172a',
-                            primary: '#0ea5e9',
-                            secondary: '#3b82f6'
-                        }
-                    },
-                    animation: {
-                        'float': 'float 6s ease-in-out infinite',
-                        'glow': 'glow 2s ease-in-out infinite alternate',
-                    },
-                    keyframes: {
-                        float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-10px)' } },
-                        glow: { 'from': { boxShadow: '0 0 10px #0ea5e9' }, 'to': { boxShadow: '0 0 20px #0ea5e9, 0 0 10px #3b82f6' } }
-                    }
-                }
-            }
-        }
-    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- ═══════════════════════════════════════════════════════════
+         FIREBASE — descomente e preencha suas credenciais quando
+         estiver pronto para subir para produção.
+         Obtenha em: console.firebase.google.com → Seu Projeto → Configurações
+    ════════════════════════════════════════════════════════════════
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+      import { getFirestore, collection, getDocs, setDoc, deleteDoc, doc, onSnapshot }
+        from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+      const firebaseConfig = {
+        apiKey:            "SUA_API_KEY",
+        authDomain:        "SEU_PROJETO.firebaseapp.com",
+        projectId:         "SEU_PROJETO",
+        storageBucket:     "SEU_PROJETO.appspot.com",
+        messagingSenderId: "SEU_SENDER_ID",
+        appId:             "SEU_APP_ID"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const db  = getFirestore(app);
+      window.__FB = { db, collection, getDocs, setDoc, deleteDoc, doc, onSnapshot };
+    <\/script>
+    -->
 
     <style>
-        body { background-color: #020617; color: #f8fafc; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
-        
-        /* Efeitos de Vidro e Gradientes */
-        .glass { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(56, 189, 248, 0.1); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); }
-        .glass-heavy { background: rgba(2, 6, 23, 0.95); backdrop-filter: blur(24px); border: 1px solid rgba(255, 255, 255, 0.05); }
-        
-        .gradient-text { background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
-        .gradient-bg { background: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%); }
-        .gradient-bg-hover:hover { background: linear-gradient(135deg, #38bdf8 0%, #60a5fa 100%); box-shadow: 0 0 25px rgba(14, 165, 233, 0.4); }
-        
-        /* Utilitários */
-        .scrollbar-hide::-webkit-scrollbar { display: none; }
-        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-        
-        /* Notificações */
-        #toast-container { position: fixed; top: 24px; right: 24px; z-index: 10000; display: flex; flex-direction: column; gap: 12px; pointer-events: none; }
-        .toast { pointer-events: auto; transform: translateX(120%); transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
-        .toast.show { transform: translateX(0); }
+        *, body { font-family:'DM Sans',sans-serif; }
+        .fd { font-family:'Unbounded',sans-serif; }
+        h1,h2,h3 { font-family:'Unbounded',sans-serif; }
 
-        /* Loader */
-        .loader { border: 3px solid rgba(14, 165, 233, 0.1); border-left-color: #0ea5e9; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        :root { --bg:#010409; --card:#0d1117; }
+
+        body { background:var(--bg); color:#e2e8f0; overflow-x:hidden; -webkit-tap-highlight-color:transparent; }
+
+        /* ── GLASS ── */
+        .glass { background:rgba(13,17,23,.88); backdrop-filter:blur(20px); border:1px solid rgba(56,189,248,.1); }
+        .gsm   { background:rgba(255,255,255,.03); backdrop-filter:blur(8px); border:1px solid rgba(255,255,255,.06); }
+
+        /* ── TEXT GRADIENT ── */
+        .tg { background:linear-gradient(135deg,#7dd3fc,#e0f2fe 50%,#38bdf8);
+              -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+
+        /* ── BUTTON ── */
+        .btn-ice { background:linear-gradient(135deg,#0ea5e9,#2563eb);
+                   box-shadow:0 0 24px rgba(14,165,233,.2); transition:all .25s; }
+        .btn-ice:hover  { box-shadow:0 0 40px rgba(14,165,233,.4); transform:translateY(-1px); }
+        .btn-ice:active { transform:scale(.97); }
+        .btn-ice:disabled { opacity:.35; cursor:not-allowed; transform:none !important; box-shadow:none !important; }
+
+        /* ── BG MESHES ── */
+        .mesh { position:fixed; border-radius:50%; pointer-events:none; z-index:0; }
+        .m1 { top:-15%;right:-8%;width:550px;height:550px;
+               background:radial-gradient(circle,rgba(14,165,233,.07) 0%,transparent 70%);
+               animation:mf 14s ease-in-out infinite; }
+        .m2 { bottom:-15%;left:-8%;width:450px;height:450px;
+               background:radial-gradient(circle,rgba(37,99,235,.06) 0%,transparent 70%);
+               animation:mf 11s ease-in-out infinite reverse; }
+        @keyframes mf { 0%,100%{transform:translate(0,0)} 50%{transform:translate(25px,-25px)} }
+
+        /* ── NOISE ── */
+        body::before { content:''; position:fixed; inset:0;
+            background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+            pointer-events:none; z-index:0; opacity:.3; }
+
+        /* ── PRODUCT CARD ── */
+        .pc { background:var(--card); border:1px solid rgba(255,255,255,.04);
+              border-radius:20px; overflow:hidden;
+              transition:all .4s cubic-bezier(.16,1,.3,1); }
+        .pc:hover { border-color:rgba(56,189,248,.22); transform:translateY(-5px);
+                    box-shadow:0 20px 50px rgba(0,0,0,.5); }
+
+        /* ── FILTER PILL ── */
+        .fpill { padding:7px 18px; border-radius:100px; font-size:11px; font-weight:700;
+                 text-transform:uppercase; letter-spacing:.1em;
+                 border:1px solid rgba(255,255,255,.06); background:rgba(255,255,255,.03);
+                 color:#64748b; cursor:pointer; white-space:nowrap; transition:all .2s; }
+        .fpill:hover  { color:#e2e8f0; border-color:rgba(56,189,248,.2); }
+        .fpill.active { background:rgba(14,165,233,.15); border-color:rgba(14,165,233,.4); color:#7dd3fc; }
+
+        /* ── PACK OPTIONS ── */
+        .popt { border:1px solid rgba(255,255,255,.07); border-radius:10px;
+                padding:7px 8px; cursor:pointer; transition:all .15s; text-align:center; }
+        .popt:hover { border-color:rgba(56,189,248,.3); background:rgba(56,189,248,.04); }
+        .popt.sel { border-color:#38bdf8; background:rgba(56,189,248,.1); }
+        .popt .pl { font-size:9px; text-transform:uppercase; font-weight:700;
+                    letter-spacing:.08em; color:#64748b; }
+        .popt.sel .pl { color:#7dd3fc; }
+        .popt .pp { font-family:'Unbounded',sans-serif; font-size:12px; font-weight:900;
+                    color:#e2e8f0; margin-top:2px; line-height:1; }
+        .popt.sel .pp { color:#38bdf8; }
+
+        /* ── STOCK BADGES ── */
+        .stk  { font-size:9px; font-weight:700; text-transform:uppercase;
+                 letter-spacing:.08em; padding:3px 8px; border-radius:20px; }
+        .sok  { background:rgba(34,197,94,.1);   color:#4ade80; border:1px solid rgba(34,197,94,.15); }
+        .slow { background:rgba(251,191,36,.1);  color:#fbbf24; border:1px solid rgba(251,191,36,.15); }
+        .sout { background:rgba(239,68,68,.1);   color:#f87171; border:1px solid rgba(239,68,68,.15); }
+
+        /* ── CART DRAWER ── */
+        #cart-drawer { transition:transform .5s cubic-bezier(.16,1,.3,1); }
+
+        /* ── NAVBAR ── */
+        #navbar { transition:all .3s; }
+        #navbar.sc { background:rgba(1,4,9,.96); backdrop-filter:blur(24px);
+                     border-bottom:1px solid rgba(56,189,248,.07); }
+
+        /* ── SCROLLBAR ── */
+        ::-webkit-scrollbar { width:3px; }
+        ::-webkit-scrollbar-track { background:transparent; }
+        ::-webkit-scrollbar-thumb { background:rgba(56,189,248,.15); border-radius:4px; }
+        .sh::-webkit-scrollbar { display:none; }
+        .sh { -ms-overflow-style:none; scrollbar-width:none; }
+
+        /* ── FORM FIELD ── */
+        .field { width:100%; background:rgba(255,255,255,.03);
+                 border:1px solid rgba(255,255,255,.08); border-radius:12px;
+                 padding:12px 16px; font-size:14px; color:#e2e8f0; outline:none;
+                 transition:border-color .2s, box-shadow .2s; }
+        .field:focus { border-color:rgba(14,165,233,.5); box-shadow:0 0 0 3px rgba(14,165,233,.07); }
+        .field::placeholder { color:rgba(148,163,184,.35); }
+        select.field { appearance:none; }
+
+        /* ── TOAST ── */
+        #toast-c { position:fixed; top:80px; right:16px; z-index:10000;
+                    display:flex; flex-direction:column; gap:8px; pointer-events:none; }
+        .toast { pointer-events:auto; transform:translateX(120%);
+                  transition:all .4s cubic-bezier(.16,1,.3,1); }
+        .toast.show { transform:translateX(0); }
+
+        /* ── LOADER ── */
+        .spin { width:28px; height:28px; border:2px solid rgba(14,165,233,.15);
+                 border-top-color:#0ea5e9; border-radius:50%;
+                 animation:rot .8s linear infinite; }
+        @keyframes rot { to { transform:rotate(360deg); } }
+
+        /* ── ANIMATIONS ── */
+        @keyframes fu { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+        .fu { animation:fu .45s ease forwards; }
+        @keyframes scaleIn { from{opacity:0;transform:scale(.95)} to{opacity:1;transform:scale(1)} }
+        .scaleIn { animation:scaleIn .3s cubic-bezier(.16,1,.3,1) forwards; }
+
+        /* ── SECURITY BADGE ── */
+        .secb { display:inline-flex; align-items:center; gap:4px;
+                 background:rgba(34,197,94,.08); color:#4ade80;
+                 border:1px solid rgba(34,197,94,.15); border-radius:20px;
+                 padding:2px 9px; font-size:9px; font-weight:700;
+                 text-transform:uppercase; letter-spacing:.1em; }
+
+        /* ── UPLOAD ZONE ── */
+        .uz { border:2px dashed rgba(56,189,248,.18); border-radius:12px;
+               padding:16px; text-align:center; cursor:pointer; transition:all .2s; }
+        .uz:hover, .uz.dov { border-color:rgba(56,189,248,.45);
+                              background:rgba(56,189,248,.04); }
+
+        /* ── LOGIN LOCKOUT ── */
+        #lockm { display:none; color:#f87171; font-size:11px;
+                  font-weight:600; text-align:center; margin-top:8px; }
+
+        /* ── TAB ── */
+        .tabbtn { padding-bottom:10px; font-family:'Unbounded',sans-serif;
+                   font-size:10px; font-weight:700; text-transform:uppercase;
+                   letter-spacing:.08em; border-bottom:2px solid transparent;
+                   color:#475569; transition:all .2s; cursor:pointer; flex:1; text-align:center; }
+        .tabbtn.at { color:#38bdf8; border-bottom-color:#38bdf8; }
+
+        /* ── SEARCH BAR ── */
+        .sbg { position:fixed; top:0; left:0; right:0; z-index:60;
+                display:flex; align-items:center; gap:12px;
+                padding:84px 20px 14px;
+                background:rgba(1,4,9,.97); border-bottom:1px solid rgba(255,255,255,.05);
+                backdrop-filter:blur(20px); }
+
+        /* ── ADMIN INVENTORY ITEM ── */
+        .inv-item { display:flex; align-items:center; justify-content:space-between;
+                     padding:12px; border-radius:16px; gap:12px;
+                     background:rgba(255,255,255,.02);
+                     border:1px solid rgba(255,255,255,.04);
+                     transition:border-color .2s; }
+        .inv-item:hover { border-color:rgba(56,189,248,.12); }
+
+        /* ── EDIT MODAL ── */
+        #edit-modal { transition:opacity .25s; }
+        #edit-modal .modal-box { animation:scaleIn .3s cubic-bezier(.16,1,.3,1) forwards; }
+
+        /* ── HIDDEN ── */
+        .hidden { display:none !important; }
     </style>
 </head>
-<body class="selection:bg-cyan-500/30">
+<body>
+<div class="mesh m1"></div>
+<div class="mesh m2"></div>
+<div id="toast-c"></div>
 
-    <!-- Toast Container -->
-    <div id="toast-container"></div>
-
-    <!-- Verificação de Idade -->
-    <div id="age-modal" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#020617] p-4 transition-opacity duration-500">
-        <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1571613316887-6f8d5cbf7ef7?q=80&w=2071&auto=format&fit=crop')] bg-cover bg-center opacity-20"></div>
-        <div class="relative max-w-md w-full glass p-8 rounded-3xl border-t border-sky-500/20 shadow-2xl text-center backdrop-blur-xl">
-            <h2 class="text-4xl font-black mb-2 italic tracking-tighter">CH<span class="text-sky-400">GELADAS</span></h2>
-            <p class="text-slate-400 text-sm font-bold uppercase tracking-widest mb-8">Conteúdo para +18 anos</p>
-            <div class="space-y-3">
-                <button onclick="App.verifyAge()" class="w-full gradient-bg text-white font-bold py-4 rounded-xl hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-sky-500/20">SOU MAIOR DE 18 ANOS</button>
-                <button onclick="window.location.href='https://google.com'" class="w-full border border-slate-700 hover:bg-slate-800 text-slate-400 py-4 rounded-xl transition-all font-semibold">NÃO SOU</button>
-            </div>
+<!-- ═══════════════════════════════════════
+     VERIFICAÇÃO DE IDADE
+════════════════════════════════════════ -->
+<div id="age-modal" class="fixed inset-0 z-[200] flex items-center justify-center p-4" style="background:#010409;">
+    <div class="absolute inset-0 bg-cover bg-center opacity-10"
+         style="background-image:url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=1200')"></div>
+    <div class="relative w-full max-w-sm glass rounded-3xl p-8 text-center">
+        <div class="text-[9px] tracking-[.4em] uppercase mb-1 fd" style="color:rgba(56,189,248,.5)">Premium Store</div>
+        <h1 class="fd text-4xl font-black text-white tracking-tighter mb-1">CH<span class="tg">GELADAS</span></h1>
+        <div class="w-10 h-px mx-auto my-5" style="background:linear-gradient(90deg,transparent,#38bdf8,transparent)"></div>
+        <p class="text-slate-400 text-sm mb-7 leading-relaxed">
+            Este site contém conteúdo sobre bebidas alcoólicas.<br>
+            Você tem <strong class="text-white">18 anos ou mais?</strong>
+        </p>
+        <div class="space-y-3">
+            <button onclick="App.verifyAge()"
+                class="btn-ice w-full text-white fd font-bold py-4 rounded-2xl text-sm tracking-wider uppercase">
+                SIM, TENHO 18+
+            </button>
+            <button onclick="window.location.href='https://google.com'"
+                class="w-full py-4 rounded-2xl text-slate-500 text-sm font-semibold border border-white/5 hover:bg-white/5 transition-all">
+                Não, sou menor
+            </button>
         </div>
     </div>
+</div>
 
-    <!-- Navbar -->
-    <nav class="fixed top-0 w-full z-50 glass border-b-0 h-20 flex items-center transition-all duration-300" id="navbar">
-        <div class="container mx-auto px-4 md:px-6 flex justify-between items-center">
-            <div class="flex flex-col cursor-pointer group select-none" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
-                <span class="text-2xl font-black italic uppercase leading-none tracking-tight group-hover:text-sky-300 transition-colors">CH<span class="text-sky-500">GELADAS</span></span>
-                <span class="text-[9px] uppercase tracking-[0.4em] text-sky-500/50 font-bold ml-0.5">Premium Store</span>
-            </div>
-
-            <div class="flex items-center gap-3">
-                <button onclick="App.toggleAdmin()" class="p-2.5 rounded-full hover:bg-white/5 transition-all text-slate-500 hover:text-sky-400 active:scale-95" title="Área Admin">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-                </button>
-                
-                <button onclick="App.toggleCart()" class="relative flex items-center gap-3 glass px-5 py-2.5 rounded-full border border-sky-500/20 hover:border-sky-400/50 hover:bg-sky-500/5 transition-all group active:scale-95">
-                    <svg class="w-5 h-5 text-sky-400 group-hover:text-sky-300 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 11h14l1 12H4l1-12z"/></svg>
-                    <span id="cart-badge" class="bg-sky-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full min-w-[20px] text-center shadow-lg shadow-sky-500/40">0</span>
-                </button>
-            </div>
+<!-- ═══════════════════════════════════════
+     NAVBAR
+════════════════════════════════════════ -->
+<nav id="navbar" class="fixed top-0 w-full z-50 flex items-center" style="height:68px;">
+    <div class="container mx-auto px-5 md:px-8 flex justify-between items-center w-full">
+        <div class="cursor-pointer select-none" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+            <div class="fd text-xl font-black text-white tracking-tighter">CH<span class="tg">GELADAS</span></div>
+            <div class="text-[8px] tracking-[.4em] uppercase mt-0.5 fd" style="color:rgba(56,189,248,.4)">Premium Store</div>
         </div>
-    </nav>
+        <div class="flex items-center gap-2.5">
+            <button onclick="App.openSearch()"
+                class="p-2.5 rounded-xl border border-white/5 hover:border-white/10 text-slate-600 hover:text-sky-400 transition-all">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+            </button>
+            <button onclick="App.toggleAdmin()" id="admbtn"
+                class="p-2.5 rounded-xl border border-white/5 hover:border-sky-400/20 text-slate-600 hover:text-sky-400 transition-all">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                </svg>
+            </button>
+            <button onclick="App.toggleCart()"
+                class="glass relative flex items-center gap-2.5 px-4 py-2.5 rounded-2xl
+                       hover:border-sky-400/40 hover:bg-sky-500/5 transition-all active:scale-95 group">
+                <svg class="w-4 h-4 text-sky-400 group-hover:text-sky-300 transition-colors"
+                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M16 11V7a4 4 0 00-8 0v4M5 11h14l1 12H4l1-12z"/>
+                </svg>
+                <span id="cbadge"
+                    class="bg-sky-500 text-white text-[10px] fd font-bold px-2 py-0.5 rounded-full min-w-[20px] text-center"
+                    style="box-shadow:0 0 12px rgba(14,165,233,.4)">0</span>
+            </button>
+        </div>
+    </div>
+</nav>
 
-    <!-- Hero Header -->
-    <header class="relative pt-32 pb-12 px-6 container mx-auto text-center md:text-left min-h-[50vh] flex flex-col justify-center">
-        <!-- Background Blobs -->
-        <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-sky-600/10 rounded-full blur-[120px] -z-10 pointer-events-none animate-pulse"></div>
-        <div class="absolute bottom-0 left-0 w-[300px] h-[300px] bg-blue-600/10 rounded-full blur-[100px] -z-10 pointer-events-none"></div>
-        
-        <h1 class="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter mb-8 leading-[0.95] text-white">
-            GELADA<br>
-            <span class="gradient-text italic">PREMIUM.</span>
+<!-- SEARCH BAR -->
+<div id="sbar" class="sbg hidden">
+    <svg class="w-4 h-4 text-slate-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+    </svg>
+    <input type="text" id="sinput" placeholder="Buscar produto..."
+        class="flex-1 bg-transparent outline-none text-white text-sm placeholder-slate-600 font-semibold"
+        oninput="App.onSearch(this.value)"
+        onkeydown="if(event.key==='Escape')App.closeSearch()">
+    <button onclick="App.closeSearch()"
+        class="text-slate-600 hover:text-white transition-colors text-xs font-bold uppercase tracking-wider">fechar</button>
+</div>
+
+<!-- ═══════════════════════════════════════
+     HERO
+════════════════════════════════════════ -->
+<header class="relative container mx-auto px-5 md:px-8 pt-28 pb-10"
+        style="min-height:52vh;display:flex;flex-direction:column;justify-content:flex-end;">
+    <div class="max-w-xl">
+        <div class="flex items-center gap-3 mb-5">
+            <div class="w-7 h-px" style="background:rgba(56,189,248,.4)"></div>
+            <span class="text-[9px] tracking-[.3em] uppercase fd font-bold"
+                  style="color:rgba(56,189,248,.5)">Bebidas Premium · Entrega Rápida</span>
+        </div>
+        <h1 class="fd text-5xl md:text-7xl font-black tracking-tighter leading-[.9] text-white mb-5">
+            GELADA<br><span class="tg">PREMIUM.</span>
         </h1>
-        
-        <!-- Filtros Dinâmicos -->
-        <div class="flex flex-wrap justify-center md:justify-start gap-3 w-full overflow-x-auto pb-4 scrollbar-hide" id="category-filters">
-            <!-- Injetado via JS -->
-            <div class="h-10 w-24 bg-slate-800/50 rounded-full animate-pulse"></div>
-            <div class="h-10 w-24 bg-slate-800/50 rounded-full animate-pulse"></div>
-            <div class="h-10 w-24 bg-slate-800/50 rounded-full animate-pulse"></div>
-        </div>
-    </header>
+        <p class="text-slate-500 text-sm max-w-xs leading-relaxed mb-8">
+            Seleção das melhores marcas. Packs com desconto. Peça agora.
+        </p>
+        <div class="flex gap-2 flex-wrap" id="catfilters"></div>
+    </div>
+</header>
 
-    <!-- Grid de Produtos -->
-    <main class="container mx-auto px-4 md:px-6 mb-32">
-        <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            <!-- Skeleton Loading -->
-            <div class="col-span-full text-center py-20">
-                <div class="inline-block loader mb-4"></div>
-                <p class="text-slate-500 text-sm font-bold tracking-widest">CARREGANDO ADEGA...</p>
+<!-- ═══════════════════════════════════════
+     PRODUCTS
+════════════════════════════════════════ -->
+<main class="container mx-auto px-5 md:px-8 pb-28 relative z-10">
+    <div class="flex items-center justify-between mb-7 pb-5"
+         style="border-bottom:1px solid rgba(255,255,255,.04);">
+        <span id="pcount" class="text-[10px] text-slate-600 font-bold uppercase tracking-widest">Carregando...</span>
+        <div class="flex items-center gap-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+            <span class="text-[10px] text-slate-600 font-semibold">Estoque ao vivo</span>
+        </div>
+    </div>
+    <div id="pgrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div class="col-span-full flex flex-col items-center py-24 gap-4">
+            <div class="spin"></div>
+            <p class="fd text-[10px] uppercase tracking-widest text-slate-600">Carregando adega...</p>
+        </div>
+    </div>
+</main>
+
+<!-- ═══════════════════════════════════════
+     ADMIN PANEL
+════════════════════════════════════════ -->
+<section id="apanel" class="hidden container mx-auto px-5 md:px-8 pb-28 relative z-10">
+    <div class="pt-10" style="border-top:1px solid rgba(255,255,255,.04);">
+
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-5 mb-8">
+            <div>
+                <div class="flex items-center gap-3 mb-1">
+                    <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"
+                          style="box-shadow:0 0 8px #22c55e"></span>
+                    <h2 class="fd text-xl font-black text-white tracking-tight">GESTÃO CH GELADAS</h2>
+                </div>
+                <div class="flex items-center gap-3 mt-2">
+                    <div class="secb">
+                        <svg class="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 1C8.676 1 6 3.676 6 7v1H4v15h16V8h-2V7c0-3.324-2.676-6-6-6z"/>
+                        </svg>
+                        WhatsApp Protegido
+                    </div>
+                    <span id="fb-indicator" class="hidden text-[9px] text-sky-400 font-bold uppercase tracking-wider">
+                        🔥 Firebase Ativo
+                    </span>
+                </div>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                <button onclick="App.importBK()"
+                    class="px-4 py-2.5 rounded-xl border border-sky-500/15 text-sky-400
+                           hover:bg-sky-500/10 text-xs fd uppercase tracking-wider font-bold transition-all">
+                    ↑ Importar JSON
+                </button>
+                <input type="file" id="ifile" accept=".json" class="hidden" onchange="App.processImport(event)">
+                <button onclick="App.resetStore()"
+                    class="px-4 py-2.5 rounded-xl border border-white/6 text-slate-500
+                           hover:text-white text-xs fd uppercase tracking-wider font-bold transition-all">
+                    Resetar
+                </button>
+                <button onclick="App.logoutAdmin()"
+                    class="px-4 py-2.5 rounded-xl border border-red-500/15 text-red-500
+                           hover:bg-red-500 hover:text-white text-xs fd uppercase tracking-wider font-bold transition-all">
+                    Sair
+                </button>
             </div>
         </div>
-    </main>
 
-    <!-- Painel ADMIN (Protegido) -->
-    <section id="admin-panel" class="hidden container mx-auto px-4 md:px-6 pb-24 animate-[fadeIn_0.5s_ease]">
-        <div class="border-t border-sky-500/10 pt-12">
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+        <!-- 2-column layout — sem sticky para evitar sobreposição -->
+        <div class="grid lg:grid-cols-5 gap-8 items-start">
+
+            <!-- ── LEFT: FORM ── -->
+            <div class="lg:col-span-2 glass p-6 rounded-3xl">
+
+                <!-- Tabs -->
+                <div class="flex border-b border-white/5 mb-6">
+                    <button id="tbnew" class="tabbtn at" onclick="App.swTab('new')">➕ Novo Produto</button>
+                    <button id="tbcfg" class="tabbtn"    onclick="App.swTab('cfg')">⚙️ Configurações</button>
+                </div>
+
+                <!-- ─── TAB: Novo Produto ─── -->
+                <div id="tpnew" class="space-y-4">
+                    <div>
+                        <label class="lbl">Nome do produto *</label>
+                        <input type="text" id="an" placeholder="Ex: Heineken 330ml" class="field">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="lbl">Preço (R$) *</label>
+                            <input type="number" id="ap" step="0.01" placeholder="0,00" class="field">
+                        </div>
+                        <div>
+                            <label class="lbl">Estoque</label>
+                            <input type="number" id="aq" placeholder="0" class="field">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="lbl">Categoria</label>
+                        <select id="ac" class="field">
+                            <option value="Cervejas">🍺 Cervejas</option>
+                            <option value="Destilados">🥃 Destilados</option>
+                            <option value="Vinhos">🍷 Vinhos</option>
+                            <option value="Águas">💧 Águas</option>
+                            <option value="Refrigerantes">🫙 Refrigerantes</option>
+                            <option value="Energéticos">⚡ Energéticos</option>
+                            <option value="Sucos">🍊 Sucos</option>
+                            <option value="Outros">🧩 Outros</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="lbl">Packs com desconto (preço total)</label>
+                        <div class="grid grid-cols-3 gap-2">
+                            <input type="number" id="ap6"  step="0.01" placeholder="6 un" class="field text-xs">
+                            <input type="number" id="ap12" step="0.01" placeholder="12 un" class="field text-xs">
+                            <input type="number" id="ap24" step="0.01" placeholder="24 un" class="field text-xs">
+                        </div>
+                        <p class="text-[8px] text-slate-700 mt-1">Deixe em branco para não exibir</p>
+                    </div>
+                    <div>
+                        <label class="lbl">Foto do produto</label>
+                        <div class="uz" id="uz"
+                             onclick="document.getElementById('aif').click()"
+                             ondragover="event.preventDefault();this.classList.add('dov')"
+                             ondragleave="this.classList.remove('dov')"
+                             ondrop="App.handleDrop(event,'uprv','aif')">
+                            <input type="file" id="aif" accept="image/*" class="hidden"
+                                   onchange="App.handleFile(event,'uprv')">
+                            <div id="uprv" class="flex flex-col items-center gap-2">
+                                <svg class="w-7 h-7" style="color:rgba(56,189,248,.3)"
+                                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                </svg>
+                                <span class="text-xs text-slate-600 font-semibold">Clique ou arraste</span>
+                                <span class="text-[9px] text-slate-700">JPG · PNG · WEBP — máx 5MB</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 my-2">
+                            <div class="flex-1 h-px bg-white/5"></div>
+                            <span class="text-[9px] text-slate-700 font-bold uppercase">ou URL</span>
+                            <div class="flex-1 h-px bg-white/5"></div>
+                        </div>
+                        <input type="text" id="ai" placeholder="https://..." class="field text-xs">
+                    </div>
+                    <button onclick="App.createProduct()"
+                        class="btn-ice w-full text-white fd font-bold py-3.5 rounded-2xl text-sm uppercase tracking-wider">
+                        + CADASTRAR PRODUTO
+                    </button>
+                </div>
+
+                <!-- ─── TAB: Configurações ─── -->
+                <div id="tpcfg" class="hidden space-y-6">
+
+                    <!-- WhatsApp -->
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <label class="lbl mb-0">WhatsApp da loja</label>
+                            <div class="secb">🔒 Protegido</div>
+                        </div>
+                        <div class="gsm rounded-xl p-3 mb-3"
+                             style="border-color:rgba(34,197,94,.15)">
+                            <p class="text-[9px] text-slate-600 mb-1 uppercase tracking-wider font-bold">Número Atual</p>
+                            <p id="wad" class="text-green-400 font-mono text-sm font-bold">—</p>
+                        </div>
+                        <input type="text" id="awa" placeholder="5511999999999 (só números)"
+                               class="field font-mono mb-2">
+                        <input type="password" id="awp" placeholder="Confirmar senha admin"
+                               class="field mb-2">
+                        <button onclick="App.saveSettings()"
+                            class="w-full py-3 rounded-xl text-sm fd font-bold uppercase tracking-wider
+                                   transition-all bg-green-500/10 hover:bg-green-500
+                                   border border-green-500/20 text-green-400 hover:text-white">
+                            SALVAR NÚMERO
+                        </button>
+                        <p class="text-[9px] text-slate-700 mt-2 leading-relaxed">
+                            ⚠️ Alterar o número exige confirmação de senha e é protegido com assinatura digital.
+                        </p>
+                    </div>
+
+                    <!-- Stats -->
+                    <div class="pt-5" style="border-top:1px solid rgba(255,255,255,.05)">
+                        <p class="text-[9px] uppercase font-bold text-slate-600 tracking-wider mb-3">Painel de Estoque</p>
+                        <div class="grid grid-cols-3 gap-2 mb-4">
+                            <div class="gsm rounded-xl p-3 text-center">
+                                <p id="sp" class="fd text-2xl font-black text-white">0</p>
+                                <p class="text-[8px] text-slate-600 uppercase tracking-wider mt-0.5">Produtos</p>
+                            </div>
+                            <div class="gsm rounded-xl p-3 text-center">
+                                <p id="sc" class="fd text-2xl font-black text-white">0</p>
+                                <p class="text-[8px] text-slate-600 uppercase tracking-wider mt-0.5">Categorias</p>
+                            </div>
+                            <div class="gsm rounded-xl p-3 text-center">
+                                <p id="ss" class="fd text-2xl font-black text-white">0</p>
+                                <p class="text-[8px] text-slate-600 uppercase tracking-wider mt-0.5">Un. Total</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Firebase Info -->
+                    <div class="pt-5" style="border-top:1px solid rgba(255,255,255,.05)">
+                        <p class="text-[9px] uppercase font-bold text-slate-600 tracking-wider mb-2">Firebase / Deploy</p>
+                        <div class="gsm rounded-xl p-3 text-xs text-slate-500 leading-relaxed">
+                            Para ativar o Firebase Firestore, edite o <code class="text-sky-400">index.html</code>
+                            e descomente o bloco &lt;script type="module"&gt; no &lt;head&gt;,
+                            preenchendo suas credenciais.<br><br>
+                            Deploy: <code class="text-sky-400">firebase deploy</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── RIGHT: INVENTORY ── -->
+            <div class="lg:col-span-3">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="fd font-bold text-white text-sm uppercase tracking-wider">Inventário</h3>
+                    <span id="icount"
+                        class="text-[9px] bg-white/4 text-slate-500 px-3 py-1 rounded-full font-bold uppercase tracking-wider">
+                        0 itens
+                    </span>
+                </div>
+                <!-- Search inside inventory -->
+                <div class="relative mb-4">
+                    <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-600"
+                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                    <input type="text" id="inv-search" placeholder="Filtrar inventário..."
+                        class="field pl-9 text-sm py-2.5"
+                        oninput="App.filterInventory(this.value)">
+                </div>
+                <div id="alist" class="space-y-2"></div>
+            </div>
+        </div><!-- end grid -->
+    </div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     CART DRAWER
+════════════════════════════════════════ -->
+<div id="cart-drawer"
+     class="fixed inset-y-0 right-0 w-full sm:w-[440px] z-[80] translate-x-full flex flex-col shadow-2xl"
+     style="background:#010409;border-left:1px solid rgba(56,189,248,.08);">
+    <div class="p-5 flex justify-between items-center"
+         style="border-bottom:1px solid rgba(255,255,255,.04);">
+        <div>
+            <h2 class="fd text-xl font-black text-white tracking-tight">MEU <span class="tg">PEDIDO</span></h2>
+            <p class="text-[10px] text-slate-600 mt-0.5 uppercase tracking-wider font-bold">Finaliza pelo WhatsApp</p>
+        </div>
+        <button onclick="App.toggleCart()"
+            class="p-2 rounded-xl border border-white/5 hover:border-white/10 text-slate-500 hover:text-white transition-all">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+        </button>
+    </div>
+    <div id="citems" class="flex-1 overflow-y-auto p-4 space-y-3 sh">
+        <div class="flex flex-col items-center justify-center h-full gap-4 opacity-20">
+            <svg class="w-14 h-14 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                      d="M16 11V7a4 4 0 00-8 0v4M5 11h14l1 12H4l1-12z"/>
+            </svg>
+            <p class="fd font-bold uppercase tracking-widest text-slate-500 text-xs">Pedido vazio</p>
+        </div>
+    </div>
+    <div class="p-5 space-y-4"
+         style="background:rgba(13,17,23,.95);border-top:1px solid rgba(255,255,255,.04);">
+        <div class="flex justify-between items-end">
+            <div>
+                <span class="block text-[9px] text-slate-600 uppercase font-bold tracking-widest">Total do Pedido</span>
+                <span class="text-[10px] text-slate-700">Entrega a confirmar</span>
+            </div>
+            <span id="ctotal" class="fd text-3xl font-black text-white tracking-tight">R$ 0,00</span>
+        </div>
+        <button onclick="App.checkout()"
+            class="btn-ice w-full text-white fd font-black py-4 rounded-2xl text-sm uppercase tracking-widest flex items-center justify-center gap-3">
+            <span>Finalizar no WhatsApp</span>
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.867-2.031-.967-.272-.099-.47-.149-.669.198-.199.347-.769.967-.943 1.165-.173.199-.347.223-.644.074-.297-.149-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
+            </svg>
+        </button>
+        <p class="text-center text-[9px] text-slate-700 font-semibold">
+            Você será redirecionado para o WhatsApp da loja
+        </p>
+    </div>
+</div>
+<div id="backdrop" onclick="App.toggleCart()"
+     class="fixed inset-0 z-[70] hidden opacity-0 transition-opacity duration-300"
+     style="background:rgba(0,0,0,.75);backdrop-filter:blur(4px);"></div>
+
+<!-- ═══════════════════════════════════════
+     LOGIN MODAL
+════════════════════════════════════════ -->
+<div id="lmodal" class="hidden fixed inset-0 z-[110] flex items-center justify-center p-4"
+     style="background:rgba(0,0,0,.92);backdrop-filter:blur(8px);">
+    <div class="glass w-full max-w-sm p-8 rounded-3xl text-center relative">
+        <button onclick="App.closeLM()"
+            class="absolute top-4 right-4 p-2 rounded-xl text-slate-600 hover:text-white hover:bg-white/5 transition-all">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M6 18L18 6M6 6l12 12" stroke-width="2"/>
+            </svg>
+        </button>
+        <div class="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-5"
+             style="background:linear-gradient(135deg,#0ea5e9,#2563eb);box-shadow:0 8px 24px rgba(14,165,233,.25)">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+            </svg>
+        </div>
+        <h3 class="fd text-xl font-black text-white mb-1 tracking-tight">ÁREA RESTRITA</h3>
+        <p class="text-slate-500 text-xs mb-5">Acesso exclusivo para administradores.</p>
+        <input type="password" id="pinput" placeholder="SENHA DE ACESSO"
+            class="field text-center text-white font-bold tracking-[.15em] mb-3"
+            onkeydown="if(event.key==='Enter')App.verifyLogin()">
+        <div id="lockm">🔒 Bloqueado por <span id="lockt"></span></div>
+        <button onclick="App.verifyLogin()" id="lbtn"
+            class="btn-ice w-full text-white fd font-bold py-3.5 rounded-2xl text-sm uppercase tracking-wider">
+            ACESSAR PAINEL
+        </button>
+        <div class="mt-4 flex items-center justify-center gap-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-green-500/60"></span>
+            <span class="text-[9px] text-slate-700 uppercase tracking-wider font-semibold">
+                SHA-256 · Bloqueio automático · Assinatura digital
+            </span>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     EDIT MODAL
+════════════════════════════════════════ -->
+<div id="edit-modal" class="hidden fixed inset-0 z-[120] flex items-start justify-center p-4 pt-20 overflow-y-auto"
+     style="background:rgba(0,0,0,.88);backdrop-filter:blur(8px);">
+    <div class="modal-box glass w-full max-w-lg rounded-3xl p-0 overflow-hidden relative mb-10">
+
+        <!-- Modal Header -->
+        <div class="flex items-center justify-between p-6 pb-4"
+             style="border-bottom:1px solid rgba(255,255,255,.06)">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl btn-ice flex items-center justify-center flex-shrink-0">
+                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                    </svg>
+                </div>
                 <div>
-                    <h2 class="text-3xl font-black text-white flex items-center gap-3">
-                        <span class="w-3 h-3 bg-green-500 rounded-full animate-pulse shadow-[0_0_15px_#22c55e]"></span>
-                        GESTÃO
-                    </h2>
-                    <p class="text-slate-400 text-sm mt-1">Modo Firebase (Simulado em LocalStorage)</p>
-                </div>
-                <div class="flex gap-3">
-                    <button onclick="App.resetStore()" class="px-5 py-2.5 rounded-xl border border-sky-500/20 text-sky-400 hover:bg-sky-500/10 font-bold text-xs uppercase tracking-wider transition-all">Resetar Fábrica</button>
-                    <button onclick="App.logoutAdmin()" class="px-5 py-2.5 rounded-xl border border-red-500/20 text-red-400 hover:bg-red-500/10 font-bold text-xs uppercase tracking-wider transition-all">Sair</button>
+                    <h3 class="fd text-base font-black text-white tracking-tight">EDITAR PRODUTO</h3>
+                    <p id="edit-subtitle" class="text-[10px] text-slate-500 mt-0.5"></p>
                 </div>
             </div>
-
-            <div class="grid lg:grid-cols-3 gap-8">
-                <!-- Formulário de Adição -->
-                <div class="lg:col-span-1 glass p-6 rounded-3xl h-fit sticky top-24">
-                    <h3 class="text-lg font-bold text-white mb-6 flex items-center gap-2">
-                        <svg class="w-5 h-5 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                        Novo Produto
-                    </h3>
-                    
-                    <div class="space-y-4">
-                        <div class="space-y-1">
-                            <label class="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Nome</label>
-                            <input type="text" id="adm-name" placeholder="Ex: Heineken 600ml" class="w-full bg-slate-900/80 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:border-sky-500 outline-none text-white transition-colors">
-                        </div>
-                        
-                        <div class="grid grid-cols-2 gap-4">
-                            <div class="space-y-1">
-                                <label class="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Preço (R$)</label>
-                                <input type="number" id="adm-price" step="0.01" placeholder="0.00" class="w-full bg-slate-900/80 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:border-sky-500 outline-none text-white transition-colors">
-                            </div>
-                            <div class="space-y-1">
-                                <label class="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Categoria</label>
-                                <select id="adm-cat" class="w-full bg-slate-900/80 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:border-sky-500 outline-none text-slate-300 transition-colors">
-                                    <option value="Cervejas">Cervejas</option>
-                                    <option value="Destilados">Destilados</option>
-                                    <option value="Vinhos">Vinhos</option>
-                                    <option value="Sem Álcool">Sem Álcool</option>
-                                    <option value="Packs">Packs</option>
-                                    <option value="Petiscos">Petiscos</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="space-y-1">
-                            <label class="text-[10px] uppercase font-bold text-slate-500 tracking-wider">URL da Imagem</label>
-                            <input type="text" id="adm-img" placeholder="https://..." class="w-full bg-slate-900/80 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:border-sky-500 outline-none text-white transition-colors">
-                        </div>
-
-                        <button onclick="App.createProduct()" class="w-full gradient-bg text-white font-bold py-3.5 rounded-xl hover:shadow-lg hover:shadow-sky-500/20 active:scale-95 transition-all mt-4">CADASTRAR PRODUTO</button>
-                    </div>
-
-                    <!-- Config WhatsApp -->
-                    <div class="mt-8 pt-8 border-t border-white/5">
-                        <label class="text-[10px] uppercase font-bold text-slate-500 tracking-wider block mb-2">WhatsApp da Loja (Somente números)</label>
-                        <div class="flex gap-2">
-                            <input type="text" id="adm-whatsapp" class="flex-1 bg-slate-900/80 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:border-green-500 outline-none text-white font-mono transition-colors">
-                            <button onclick="App.saveSettings()" class="bg-green-500/10 hover:bg-green-500 border border-green-500/20 hover:text-white text-green-500 rounded-xl px-4 transition-all">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Lista de Produtos -->
-                <div class="lg:col-span-2 space-y-4">
-                    <h3 class="text-lg font-bold text-white flex items-center justify-between">
-                        <span>Inventário</span>
-                        <span class="text-xs bg-slate-800 text-slate-400 px-2 py-1 rounded-md" id="inventory-count">0 items</span>
-                    </h3>
-                    <div id="admin-list" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <!-- Injetado via JS -->
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Drawer Carrinho -->
-    <div id="cart-drawer" class="fixed inset-y-0 right-0 w-full sm:w-[480px] bg-[#020617] z-[80] translate-x-full transition-transform duration-500 cubic-bezier(0.16, 1, 0.3, 1) shadow-2xl border-l border-sky-500/10 flex flex-col">
-        
-        <div class="p-6 border-b border-white/5 bg-sky-900/5 backdrop-blur-sm flex justify-between items-center">
-            <h2 class="text-xl font-black italic text-white">MEU <span class="text-sky-500">CESTO</span></h2>
-            <button onclick="App.toggleCart()" class="p-2 hover:bg-white/5 rounded-full text-slate-400 hover:text-white transition-colors">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            <button onclick="App.closeEdit()"
+                class="p-2 rounded-xl text-slate-600 hover:text-white hover:bg-white/5 transition-all">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M6 18L18 6M6 6l12 12" stroke-width="2"/>
+                </svg>
             </button>
         </div>
 
-        <div id="cart-items" class="flex-1 overflow-y-auto p-6 space-y-4 scrollbar-hide">
-            <!-- Items Injetados -->
-            <div class="flex flex-col items-center justify-center h-full opacity-30 gap-4">
-                <svg class="w-20 h-20 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 11h14l1 12H4l1-12z"/></svg>
-                <p class="font-bold uppercase tracking-widest text-slate-500">Seu cesto está vazio</p>
+        <!-- Modal Body -->
+        <div class="p-6 space-y-4 max-h-[70vh] overflow-y-auto sh">
+
+            <!-- Preview da foto atual -->
+            <div id="edit-img-preview" class="hidden">
+                <label class="lbl">Foto atual</label>
+                <div class="flex items-center gap-4 p-3 rounded-xl gsm">
+                    <img id="edit-img-thumb"
+                         class="w-16 h-16 rounded-xl object-cover bg-slate-800 flex-shrink-0" src="" alt="">
+                    <div class="flex-1 min-w-0">
+                        <p class="text-xs text-slate-400 font-semibold">Imagem do produto</p>
+                        <p class="text-[10px] text-slate-600 mt-0.5">Substitua abaixo se quiser trocar</p>
+                    </div>
+                </div>
             </div>
+
+            <!-- Nova foto -->
+            <div>
+                <label class="lbl">Trocar foto (opcional)</label>
+                <div class="uz" id="edit-uz"
+                     onclick="document.getElementById('edit-img-file').click()"
+                     ondragover="event.preventDefault();this.classList.add('dov')"
+                     ondragleave="this.classList.remove('dov')"
+                     ondrop="App.handleDrop(event,'edit-uprv','edit-img-file')">
+                    <input type="file" id="edit-img-file" accept="image/*" class="hidden"
+                           onchange="App.handleFile(event,'edit-uprv')">
+                    <div id="edit-uprv" class="flex flex-col items-center gap-1.5">
+                        <svg class="w-6 h-6" style="color:rgba(56,189,248,.3)"
+                             fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                        <span class="text-xs text-slate-600 font-semibold">Clique ou arraste nova foto</span>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 my-2">
+                    <div class="flex-1 h-px bg-white/5"></div>
+                    <span class="text-[9px] text-slate-700 font-bold uppercase">ou URL</span>
+                    <div class="flex-1 h-px bg-white/5"></div>
+                </div>
+                <input type="text" id="edit-img-url" placeholder="https://..." class="field text-xs">
+            </div>
+
+            <div class="grid grid-cols-1 gap-4">
+                <div>
+                    <label class="lbl">Nome do produto *</label>
+                    <input type="text" id="edit-name" class="field">
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="lbl">Preço unitário (R$) *</label>
+                    <input type="number" id="edit-price" step="0.01" class="field">
+                </div>
+                <div>
+                    <label class="lbl">Estoque (unidades)</label>
+                    <input type="number" id="edit-qty" class="field">
+                </div>
+            </div>
+            <div>
+                <label class="lbl">Categoria</label>
+                <select id="edit-cat" class="field">
+                    <option value="Cervejas">🍺 Cervejas</option>
+                    <option value="Destilados">🥃 Destilados</option>
+                    <option value="Vinhos">🍷 Vinhos</option>
+                    <option value="Águas">💧 Águas</option>
+                    <option value="Refrigerantes">🫙 Refrigerantes</option>
+                    <option value="Energéticos">⚡ Energéticos</option>
+                    <option value="Sucos">🍊 Sucos</option>
+                    <option value="Outros">🧩 Outros</option>
+                </select>
+            </div>
+            <div>
+                <label class="lbl">Packs com desconto (preço total do pack)</label>
+                <div class="grid grid-cols-3 gap-2">
+                    <div>
+                        <p class="text-[8px] text-slate-600 font-bold mb-1 uppercase">6 unidades</p>
+                        <input type="number" id="edit-p6" step="0.01" placeholder="—" class="field text-xs">
+                    </div>
+                    <div>
+                        <p class="text-[8px] text-slate-600 font-bold mb-1 uppercase">12 unidades</p>
+                        <input type="number" id="edit-p12" step="0.01" placeholder="—" class="field text-xs">
+                    </div>
+                    <div>
+                        <p class="text-[8px] text-slate-600 font-bold mb-1 uppercase">24 unidades</p>
+                        <input type="number" id="edit-p24" step="0.01" placeholder="—" class="field text-xs">
+                    </div>
+                </div>
+                <p class="text-[8px] text-slate-700 mt-1">Deixe em branco para remover o pack</p>
+            </div>
+
+            <input type="hidden" id="edit-id">
         </div>
 
-        <div class="p-6 bg-[#050b1d] border-t border-white/5 space-y-4">
-            <div class="flex justify-between items-end">
-                <span class="text-xs text-slate-500 uppercase font-bold tracking-widest">Total Estimado</span>
-                <span id="cart-total" class="text-3xl font-black text-white tracking-tight">R$ 0,00</span>
-            </div>
-            <button onclick="App.checkout()" class="w-full gradient-bg gradient-bg-hover text-white font-black py-4 rounded-xl text-sm uppercase tracking-[0.15em] transition-all shadow-lg shadow-sky-500/20 flex items-center justify-center gap-3">
-                <span>Finalizar no WhatsApp</span>
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-8.68-2.031-.967-.272-.099-.47-.149-.669.198-.199.347-.769.967-.943 1.165-.173.199-.347.223-.644.074-.297-.149-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+        <!-- Modal Footer -->
+        <div class="p-6 pt-4 flex gap-3" style="border-top:1px solid rgba(255,255,255,.06)">
+            <button onclick="App.closeEdit()"
+                class="flex-1 py-3 rounded-xl text-sm fd font-bold uppercase tracking-wider
+                       border border-white/8 text-slate-500 hover:text-white hover:border-white/15 transition-all">
+                Cancelar
+            </button>
+            <button onclick="App.saveEdit()"
+                class="btn-ice flex-2 flex-1 py-3 rounded-xl text-sm fd font-bold uppercase tracking-wider text-white">
+                ✓ SALVAR ALTERAÇÕES
             </button>
         </div>
     </div>
+</div>
 
-    <!-- Backdrop Escuro -->
-    <div id="backdrop" onclick="App.toggleCart()" class="fixed inset-0 bg-black/60 z-[70] hidden backdrop-blur-[2px] opacity-0 transition-opacity duration-300"></div>
+<!-- FOOTER -->
+<footer class="relative z-10 border-t pt-8 pb-10 text-center px-5"
+        style="border-color:rgba(255,255,255,.04)">
+    <div class="fd text-2xl font-black text-white tracking-tight mb-1">CH<span class="tg">GELADAS</span></div>
+    <p class="text-slate-700 text-xs">© 2026 CH Geladas · Todos os direitos reservados · Conteúdo +18</p>
+</footer>
 
-    <!-- Modal Senha -->
-    <dialog id="password-modal" class="bg-transparent p-0 open:flex items-center justify-center fixed inset-0 z-[110] w-full h-full backdrop:bg-black/90 backdrop:backdrop-blur-sm hidden">
-        <form method="dialog" class="glass-heavy p-8 rounded-[2rem] w-full max-w-sm text-center border border-sky-500/20 relative overflow-hidden shadow-2xl">
-            <button onclick="document.getElementById('password-modal').close()" type="button" class="absolute top-4 right-4 text-slate-500 hover:text-white transition-colors"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2"/></svg></button>
-            
-            <div class="w-16 h-16 bg-gradient-to-br from-sky-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-sky-500/30">
-                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-            </div>
-            
-            <h3 class="text-xl font-bold text-white mb-2">Área Restrita</h3>
-            <p class="text-slate-400 text-xs mb-6 px-4">Acesso exclusivo para gerência da CH Geladas.</p>
-            
-            <input type="password" id="pass-input" placeholder="DIGITE A SENHA" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 mb-4 text-center text-white outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 font-bold tracking-[0.2em] transition-all placeholder-slate-700">
-            <button type="button" onclick="App.verifyLogin()" class="w-full gradient-bg text-white font-bold py-3.5 rounded-xl hover:scale-[1.02] active:scale-95 transition-all text-sm uppercase tracking-wider shadow-lg shadow-sky-500/20">Acessar Painel</button>
-        </form>
-    </dialog>
+<!-- ═══════════════════════════════════════════════════════════════
+     JAVASCRIPT
+════════════════════════════════════════════════════════════════ -->
+<script>
+/* ────────────────────────────────────────────────────────
+   SEGURANÇA
+──────────────────────────────────────────────────────── */
+const ADMIN_HASH = "77afc49b7b14daf09895c77638e1b08bf8e5116f1f3458a5ccec211166dc6229";
+const DEFAULT_WA  = "5511999999999"; // ← SEU NÚMERO AQUI (DDI+DDD+número)
+const SK          = "ch_geladas_wk_7f3a9b2e1d8c4f56";
+const MAX_ATT = 5, LOCK_MS = 15 * 60 * 1000;
 
-    <script>
-        /**
-         * ------------------------------------------------------------------
-         * CAMADA DE SERVIÇO DE DADOS (DATA LAYER)
-         * ------------------------------------------------------------------
-         * Estruturado para simular o Firebase Firestore.
-         * Quando quiser migrar, altere apenas esta classe 'DataService'.
-         */
-        const DB_COLLECTIONS = {
-            PRODUCTS: 'ch_products_v2',
-            SETTINGS: 'ch_settings_v2'
-        };
+async function sha256(s) {
+    const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
+    return Array.from(new Uint8Array(b)).map(x => x.toString(16).padStart(2,'0')).join('');
+}
 
-        const DataService = {
-            // Simula collection(db, name)
-            async getCollection(collectionName) {
-                // Simula latência de rede (opcional, para realismo)
-                // await new Promise(r => setTimeout(r, 300)); 
-                const data = localStorage.getItem(collectionName);
-                return data ? JSON.parse(data) : [];
-            },
+const Sec = {
+    sign(v) {
+        let h = 0, s = SK + v + SK.split('').reverse().join('');
+        for (let i = 0; i < s.length; i++) { h = ((h << 5) - h) + s.charCodeAt(i); h |= 0; }
+        return Math.abs(h).toString(36);
+    },
+    save(n)  { localStorage.setItem('chg_s', JSON.stringify({ w: n, sig: this.sign(n) })); },
+    read()   {
+        try {
+            const { w, sig } = JSON.parse(localStorage.getItem('chg_s') || '{}');
+            if (!w) return DEFAULT_WA;
+            return this.sign(w) === sig ? w : DEFAULT_WA;
+        } catch { return DEFAULT_WA; }
+    }
+};
 
-            // Simula setDoc / addDoc
-            async saveDocument(collectionName, docData) {
-                const currentData = await this.getCollection(collectionName);
-                
-                // Se for array (coleção de produtos)
-                if (Array.isArray(currentData)) {
-                    const index = currentData.findIndex(d => d.id === docData.id);
-                    if (index >= 0) {
-                        currentData[index] = { ...currentData[index], ...docData, updatedAt: Date.now() };
-                    } else {
-                        currentData.push({ ...docData, createdAt: Date.now() });
-                    }
-                    localStorage.setItem(collectionName, JSON.stringify(currentData));
-                } 
-                // Se for objeto único (settings)
-                else {
-                    const newData = { ...currentData, ...docData };
-                    localStorage.setItem(collectionName, JSON.stringify(newData));
-                }
-                return docData;
-            },
+const RL = {
+    locked() { return Date.now() < parseInt(localStorage.getItem('chg_lk') || 0); },
+    rem()    { return Math.max(0, parseInt(localStorage.getItem('chg_lk') || 0) - Date.now()); },
+    atts()   { return parseInt(localStorage.getItem('chg_at') || 0); },
+    fail()   {
+        const a = this.atts() + 1;
+        localStorage.setItem('chg_at', a);
+        if (a >= MAX_ATT) { localStorage.setItem('chg_lk', Date.now() + LOCK_MS); localStorage.removeItem('chg_at'); }
+        return MAX_ATT - a;
+    },
+    clear()  { localStorage.removeItem('chg_at'); localStorage.removeItem('chg_lk'); }
+};
 
-            // Simula deleteDoc
-            async deleteDocument(collectionName, docId) {
-                const currentData = await this.getCollection(collectionName);
-                if (Array.isArray(currentData)) {
-                    const newData = currentData.filter(d => d.id !== docId);
-                    localStorage.setItem(collectionName, JSON.stringify(newData));
-                }
-            },
+/* ────────────────────────────────────────────────────────
+   ESTOQUE INICIAL (backup 18/02/2026)
+──────────────────────────────────────────────────────── */
+const SEED = [
+    {id:'s001',name:'Heineken Garrafa 330ml',         price:8.99, qty:504,cat:'Cervejas',    packs:[{un:6,price:53.99},{un:24,price:159.99}],img:'https://images.unsplash.com/photo-1618183182848-7076a54160a0?auto=format&fit=crop&w=500'},
+    {id:'s002',name:'Budweiser Garrafa 330ml',         price:7.99, qty:48, cat:'Cervejas',    packs:[{un:6,price:35.99},{un:12,price:69.99}], img:'https://images.unsplash.com/photo-1563227812-0ea4c22e6cc8?auto=format&fit=crop&w=500'},
+    {id:'s003',name:'Império Lager Garrafa 330ml',     price:6.99, qty:120,cat:'Cervejas',    packs:[{un:12,price:50.99}],                    img:'https://images.unsplash.com/photo-1608270586620-248524c67de9?auto=format&fit=crop&w=500'},
+    {id:'s004',name:'Brahma Chop Lata 350ml',          price:4.99, qty:84, cat:'Cervejas',    packs:[{un:12,price:36.99}],                    img:'https://images.unsplash.com/photo-1535958636474-b021ee887b13?auto=format&fit=crop&w=500'},
+    {id:'s005',name:'Itaipava Lata 350ml',             price:4.49, qty:120,cat:'Cervejas',    packs:[{un:12,price:34.99}],                    img:'https://images.unsplash.com/photo-1566633806327-68e152aaf26d?auto=format&fit=crop&w=500'},
+    {id:'s006',name:'Heineken S/Álcool 350ml',         price:7.49, qty:60, cat:'Cervejas',    packs:[{un:12,price:62.00}],                    img:'https://images.unsplash.com/photo-1612528443702-f6741f70a049?auto=format&fit=crop&w=500'},
+    {id:'s007',name:'Amstel Lata 350ml',               price:4.99, qty:240,cat:'Cervejas',    packs:[{un:12,price:44.99}],                    img:'https://images.unsplash.com/photo-1571613316887-6f8d5cbf7ef7?auto=format&fit=crop&w=500'},
+    {id:'s008',name:'Devassa Lata 350ml',              price:4.49, qty:180,cat:'Cervejas',    packs:[{un:12,price:35.99}],                    img:'https://images.unsplash.com/photo-1558642891-54be180ea339?auto=format&fit=crop&w=500'},
+    {id:'s009',name:'Nova Schin Lata 350ml',           price:3.99, qty:180,cat:'Cervejas',    packs:[{un:12,price:30.99}],                    img:'https://images.unsplash.com/photo-1550950158-d0d960dff51b?auto=format&fit=crop&w=500'},
+    {id:'s010',name:'Vodka Slova 970ml',               price:15.99,qty:2,  cat:'Destilados',  packs:[],                                       img:'https://images.unsplash.com/photo-1613243555988-441166d4d6fd?auto=format&fit=crop&w=500'},
+    {id:'s011',name:'Coquetel da Roça / Canelinha',    price:16.49,qty:2,  cat:'Destilados',  packs:[],                                       img:'https://images.unsplash.com/photo-1560512823-829485b8bf24?auto=format&fit=crop&w=500'},
+    {id:'s012',name:'Caninha da Roça PET 500ml',       price:5.50, qty:12, cat:'Destilados',  packs:[],                                       img:'https://images.unsplash.com/photo-1574281927898-5fd5f28a91dc?auto=format&fit=crop&w=500'},
+    {id:'s013',name:'Vinho Tinto Suave Primo Fior 750ml',price:14.99,qty:6,cat:'Vinhos',      packs:[],                                       img:'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?auto=format&fit=crop&w=500'},
+    {id:'s014',name:'Vinho Quinto do Morgado 750ml',   price:22.99,qty:12, cat:'Vinhos',      packs:[],                                       img:'https://images.unsplash.com/photo-1474722883778-792e7990302f?auto=format&fit=crop&w=500'},
+    {id:'s015',name:'Vinho Tinto Dom Bosco 750ml',     price:16.50,qty:12, cat:'Vinhos',      packs:[],                                       img:'https://images.unsplash.com/photo-1553361371-9b22f78e8b1d?auto=format&fit=crop&w=500'},
+    {id:'s016',name:'Água Petrópolis S/Gás 500ml',     price:2.49, qty:60, cat:'Águas',       packs:[{un:12,price:21.99}],                    img:'https://images.unsplash.com/photo-1564419320408-38e45c4e8d4c?auto=format&fit=crop&w=500'},
+    {id:'s017',name:'Água D.Avila 1,5L',               price:4.49, qty:12, cat:'Águas',       packs:[{un:6,price:21.99}],                     img:'https://images.unsplash.com/photo-1523362628745-0c100150b504?auto=format&fit=crop&w=500'},
+    {id:'s018',name:'Água Petrópolis C/Gás',           price:3.49, qty:120,cat:'Águas',       packs:[{un:12,price:19.99}],                    img:'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=500'},
+    {id:'s019',name:'Ref Goob Guaraná 2L',             price:5.99, qty:6,  cat:'Refrigerantes',packs:[{un:6,price:35.99}],                    img:'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=500'},
+    {id:'s020',name:'Ref Goob Cola 2L',                price:5.99, qty:6,  cat:'Refrigerantes',packs:[{un:6,price:35.99}],                    img:'https://images.unsplash.com/photo-1581636625402-2945c9c6ba85?auto=format&fit=crop&w=500'},
+    {id:'s021',name:'REFRI Guaraná 2L',                price:5.49, qty:6,  cat:'Refrigerantes',packs:[{un:6,price:32.99}],                    img:'https://images.unsplash.com/photo-1595981234058-a9302fb97229?auto=format&fit=crop&w=500'},
+    {id:'s022',name:'REFRI Cola 2L',                   price:5.49, qty:6,  cat:'Refrigerantes',packs:[{un:6,price:32.99}],                    img:'https://images.unsplash.com/photo-1610295174052-8c5d82acfd44?auto=format&fit=crop&w=500'},
+    {id:'s023',name:'Bebida Energética UP 2L',         price:11.99,qty:30, cat:'Energéticos', packs:[{un:6,price:65.99}],                     img:'https://images.unsplash.com/photo-1551538827-9c037cb4f32a?auto=format&fit=crop&w=500'},
+    {id:'s024',name:'Suco Yulo Frutas Cítricas 1,5L',  price:6.99, qty:6,  cat:'Sucos',       packs:[{un:6,price:41.99}],                     img:'https://images.unsplash.com/photo-1600271886742-f049cd451bba?auto=format&fit=crop&w=500'},
+    {id:'s025',name:'Isqueiro BIC Maxi',               price:4.99, qty:12, cat:'Outros',      packs:[],                                       img:'https://images.unsplash.com/photo-1572635196237-14b3f281503f?auto=format&fit=crop&w=500'},
+];
 
-            // Inicialização (Seed)
-            async initSeed() {
-                const hasData = localStorage.getItem(DB_COLLECTIONS.PRODUCTS);
-                if (!hasData) {
-                    const initialProducts = [
-                        { id: crypto.randomUUID(), name: "Heineken 330ml", price: 6.50, category: "Cervejas", img: "https://images.unsplash.com/photo-1618183182848-7076a54160a0?auto=format&fit=crop&w=500" },
-                        { id: crypto.randomUUID(), name: "Corona Extra", price: 8.00, category: "Cervejas", img: "https://images.unsplash.com/photo-1629205626372-d59663d86789?auto=format&fit=crop&w=500" },
-                        { id: crypto.randomUUID(), name: "Absolut Vodka", price: 89.90, category: "Destilados", img: "https://images.unsplash.com/photo-1613243555988-441166d4d6fd?auto=format&fit=crop&w=500" },
-                        { id: crypto.randomUUID(), name: "Coca-Cola Lata", price: 5.00, category: "Sem Álcool", img: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=500" },
-                        { id: crypto.randomUUID(), name: "Combo Gin Tanqueray", price: 150.00, category: "Packs", img: "https://images.unsplash.com/photo-1597075687490-8f673c6c17f6?auto=format&fit=crop&w=500" }
-                    ];
-                    localStorage.setItem(DB_COLLECTIONS.PRODUCTS, JSON.stringify(initialProducts));
-                    
-                    const initialConfig = { whatsapp: "5511999999999" };
-                    localStorage.setItem(DB_COLLECTIONS.SETTINGS, JSON.stringify(initialConfig));
-                }
+/* ────────────────────────────────────────────────────────
+   CATEGORIA META
+──────────────────────────────────────────────────────── */
+const CATM = {
+    'Cervejas':      { e:'🍺', c:'rgba(251,191,36,.12)', t:'#fbbf24' },
+    'Destilados':    { e:'🥃', c:'rgba(251,146,60,.12)', t:'#fb923c' },
+    'Vinhos':        { e:'🍷', c:'rgba(239,68,68,.12)',  t:'#f87171' },
+    'Águas':         { e:'💧', c:'rgba(56,189,248,.12)', t:'#38bdf8' },
+    'Refrigerantes': { e:'🫙', c:'rgba(132,204,22,.12)', t:'#a3e635' },
+    'Energéticos':   { e:'⚡', c:'rgba(168,85,247,.12)', t:'#c084fc' },
+    'Sucos':         { e:'🍊', c:'rgba(251,191,36,.12)', t:'#fbbf24' },
+    'Outros':        { e:'🧩', c:'rgba(148,163,184,.1)', t:'#94a3b8' },
+};
+const cm = cat => CATM[cat] || { e:'🛒', c:'rgba(56,189,248,.1)', t:'#38bdf8' };
+
+/* ────────────────────────────────────────────────────────
+   DATA SERVICE (LocalStorage — pronto para Firebase)
+──────────────────────────────────────────────────────── */
+const DBK = 'chg_v4';
+
+const DS = {
+    all()   { const d = localStorage.getItem(DBK); return d ? JSON.parse(d) : []; },
+    save(p) {
+        const a = this.all();
+        const i = a.findIndex(x => x.id === p.id);
+        if (i >= 0) a[i] = { ...a[i], ...p, updatedAt: Date.now() };
+        else a.push({ ...p, createdAt: Date.now() });
+        localStorage.setItem(DBK, JSON.stringify(a));
+        // Firebase sync (se ativo):
+        if (window.__FB) {
+            const { db, setDoc, doc, collection } = window.__FB;
+            setDoc(doc(collection(db,'products'), p.id), p).catch(console.error);
+        }
+    },
+    del(id) {
+        localStorage.setItem(DBK, JSON.stringify(this.all().filter(p => p.id !== id)));
+        if (window.__FB) {
+            const { db, deleteDoc, doc, collection } = window.__FB;
+            deleteDoc(doc(collection(db,'products'), id)).catch(console.error);
+        }
+    },
+    seed()  {
+        if (localStorage.getItem(DBK)) return;
+        localStorage.setItem(DBK, JSON.stringify(SEED.map(p => ({ ...p, createdAt: Date.now() }))));
+        if (!localStorage.getItem('chg_s')) Sec.save(DEFAULT_WA);
+    }
+};
+
+/* ────────────────────────────────────────────────────────
+   HELPERS DE CSS (label utilitário)
+──────────────────────────────────────────────────────── */
+// Injeta estilo .lbl globalmente
+const lblStyle = document.createElement('style');
+lblStyle.textContent = '.lbl{display:block;font-size:9px;text-transform:uppercase;font-weight:700;color:#475569;letter-spacing:.08em;margin-bottom:6px;}';
+document.head.appendChild(lblStyle);
+
+/* ────────────────────────────────────────────────────────
+   APP CONTROLLER
+──────────────────────────────────────────────────────── */
+const App = {
+    st: {
+        products: [],
+        cart: [],
+        wa: DEFAULT_WA,
+        filter: 'Todas',
+        isAdmin: false,
+        imgData: null,      // para o formulário "Novo Produto"
+        editImgData: null,  // para o modal de edição
+        search: '',
+        picks: {},          // seleção de pack por produto
+        invFilter: ''       // filtro interno do inventário admin
+    },
+
+    /* ── INIT ── */
+    init() {
+        window.addEventListener('scroll', () =>
+            document.getElementById('navbar').classList.toggle('sc', scrollY > 20));
+
+        DS.seed();
+        this.st.products = DS.all();
+        this.st.wa = Sec.read();
+
+        if (sessionStorage.getItem('chg_admin')) {
+            this.st.isAdmin = true;
+            document.getElementById('admbtn').style.color = '#38bdf8';
+        }
+        if (!localStorage.getItem('chg_age')) {
+            document.getElementById('age-modal').classList.remove('hidden');
+        } else {
+            document.getElementById('age-modal').classList.add('hidden');
+        }
+
+        // Firebase indicator
+        if (window.__FB) {
+            document.getElementById('fb-indicator').classList.remove('hidden');
+            this._syncFromFirebase();
+        }
+
+        this.renderStore();
+    },
+
+    async _syncFromFirebase() {
+        try {
+            const { db, collection, getDocs } = window.__FB;
+            const snap = await getDocs(collection(db, 'products'));
+            if (!snap.empty) {
+                const products = [];
+                snap.forEach(d => products.push(d.data()));
+                localStorage.setItem(DBK, JSON.stringify(products));
+                this.st.products = products;
+                this.renderStore();
+                if (this.st.isAdmin) this.renderAdmin();
             }
+        } catch (e) { console.warn('Firebase sync error:', e); }
+    },
+
+    /* ── IDADE ── */
+    verifyAge() {
+        localStorage.setItem('chg_age', '1');
+        const m = document.getElementById('age-modal');
+        m.style.transition = 'opacity .5s'; m.style.opacity = '0';
+        setTimeout(() => m.classList.add('hidden'), 500);
+    },
+
+    /* ── BUSCA ── */
+    openSearch() {
+        document.getElementById('sbar').classList.remove('hidden');
+        setTimeout(() => document.getElementById('sinput').focus(), 50);
+    },
+    closeSearch() {
+        document.getElementById('sbar').classList.add('hidden');
+        document.getElementById('sinput').value = '';
+        this.st.search = ''; this.renderStore();
+    },
+    onSearch(v) { this.st.search = v.toLowerCase().trim(); this.renderStore(); },
+
+    /* ── ADMIN ── */
+    toggleAdmin() {
+        if (this.st.isAdmin) {
+            document.getElementById('apanel').classList.remove('hidden');
+            setTimeout(() => document.getElementById('apanel').scrollIntoView({ behavior: 'smooth' }), 50);
+            this.renderAdmin();
+        } else {
+            this.openLM();
+        }
+    },
+    openLM() {
+        document.getElementById('pinput').value = '';
+        document.getElementById('lockm').style.display = 'none';
+        const b = document.getElementById('lbtn'); b.disabled = false; b.style.opacity = '1';
+        document.getElementById('lmodal').classList.remove('hidden');
+        setTimeout(() => document.getElementById('pinput').focus(), 80);
+        if (RL.locked()) this._lockUI();
+    },
+    closeLM() { document.getElementById('lmodal').classList.add('hidden'); if (this._li) clearInterval(this._li); },
+    _lockUI() {
+        const b = document.getElementById('lbtn'); b.disabled = true; b.style.opacity = '.4';
+        document.getElementById('lockm').style.display = 'block';
+        const tick = () => {
+            const r = RL.rem();
+            if (r <= 0) { clearInterval(this._li); b.disabled = false; b.style.opacity = '1'; document.getElementById('lockm').style.display = 'none'; return; }
+            document.getElementById('lockt').textContent = `${Math.floor(r/60000)}m ${Math.floor((r%60000)/1000)}s`;
         };
+        tick(); this._li = setInterval(tick, 1000);
+    },
+    async verifyLogin() {
+        if (RL.locked()) { this._lockUI(); return; }
+        const h = await sha256(document.getElementById('pinput').value);
+        if (h === ADMIN_HASH) {
+            RL.clear(); this.st.isAdmin = true; sessionStorage.setItem('chg_admin', '1');
+            document.getElementById('admbtn').style.color = '#38bdf8';
+            this.closeLM(); this.renderAdmin();
+            document.getElementById('apanel').classList.remove('hidden');
+            setTimeout(() => document.getElementById('apanel').scrollIntoView({ behavior: 'smooth' }), 200);
+            this.toast('✅ Acesso admin concedido!');
+        } else {
+            const left = RL.fail();
+            if (RL.locked()) { this._lockUI(); this.toast('🔒 Bloqueado por 15 min!', 'err'); }
+            else { this.toast(`Senha incorreta. ${left} tentativa(s).`, 'err'); document.getElementById('pinput').value = ''; }
+        }
+    },
+    logoutAdmin() {
+        this.st.isAdmin = false; sessionStorage.removeItem('chg_admin');
+        document.getElementById('apanel').classList.add('hidden');
+        document.getElementById('admbtn').style.color = '';
+        this.toast('Sessão encerrada.');
+    },
 
-        /**
-         * ------------------------------------------------------------------
-         * LÓGICA DA APLICAÇÃO (CONTROLLER)
-         * ------------------------------------------------------------------
-         */
-        const App = {
-            state: {
-                products: [],
-                cart: [], // Sessão apenas (como pedido)
-                config: {},
-                activeFilter: 'Todas',
-                isAdmin: false
-            },
+    /* ── TABS ── */
+    swTab(t) {
+        ['new','cfg'].forEach(k => {
+            document.getElementById(`tp${k}`).classList.toggle('hidden', k !== t);
+            document.getElementById(`tb${k}`).className = `tabbtn${k===t?' at':''}`;
+        });
+        if (t === 'cfg') {
+            const n = this.st.products.length;
+            document.getElementById('wad').textContent = this.st.wa.replace(/(\d{2})(\d{2})(\d{5})(\d{4})/,'+$1 ($2) $3-$4');
+            document.getElementById('sp').textContent = n;
+            document.getElementById('sc').textContent = new Set(this.st.products.map(p=>p.cat)).size;
+            document.getElementById('ss').textContent = this.st.products.reduce((a,p)=>a+(p.qty||0),0);
+        }
+    },
 
-            async init() {
-                await DataService.initSeed();
-                await this.refreshData();
-                
-                // Verifica autenticação admin persistida na sessão
-                if (sessionStorage.getItem('ch_admin_session')) {
-                    this.state.isAdmin = true;
-                    this.renderAdmin();
-                }
+    /* ── IMAGE UPLOAD (genérico, usa IDs como parâmetros) ── */
+    handleFile(e, previewId) {
+        const f = e.target.files[0]; if (f) this._readImg(f, previewId);
+    },
+    handleDrop(e, previewId, inputId) {
+        e.preventDefault();
+        e.currentTarget.classList.remove('dov');
+        const f = e.dataTransfer.files[0];
+        if (f && f.type.startsWith('image/')) this._readImg(f, previewId, inputId);
+    },
+    _readImg(file, previewId, inputId) {
+        if (file.size > 5 * 1024 * 1024) { this.toast('Imagem max 5MB', 'err'); return; }
+        const r = new FileReader();
+        r.onload = ev => {
+            const data = ev.target.result;
+            // Armazena no estado correto
+            if (previewId === 'uprv') this.st.imgData = data;
+            else                      this.st.editImgData = data;
 
-                // Verifica idade
-                if (!localStorage.getItem('ch_age_verified_v2')) {
-                    document.getElementById('age-modal').classList.remove('hidden');
-                } else {
-                    document.getElementById('age-modal').classList.add('hidden');
-                }
+            document.getElementById(previewId).innerHTML = `
+                <img src="${data}" class="w-14 h-14 object-cover rounded-xl mx-auto">
+                <p class="text-[9px] text-sky-400 font-semibold mt-1 truncate max-w-[150px]">${file.name}</p>
+                <button onclick="App._clearImg('${previewId}')" class="text-[9px] text-red-400 hover:text-red-300 font-bold uppercase tracking-wider">✕ Remover</button>`;
+        };
+        r.readAsDataURL(file);
+    },
+    _clearImg(previewId) {
+        if (previewId === 'uprv') { this.st.imgData = null; document.getElementById('aif').value = ''; }
+        else                      { this.st.editImgData = null; document.getElementById('edit-img-file').value = ''; }
+        document.getElementById(previewId).innerHTML = `
+            <svg class="w-6 h-6 mx-auto" style="color:rgba(56,189,248,.3)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+            <span class="text-xs text-slate-600 font-semibold">Clique ou arraste</span>`;
+    },
 
-                this.renderStore();
-            },
+    /* ── CRIAR PRODUTO ── */
+    createProduct() {
+        const name  = document.getElementById('an').value.trim();
+        const price = parseFloat(document.getElementById('ap').value);
+        const qty   = parseInt(document.getElementById('aq').value) || 0;
+        const cat   = document.getElementById('ac').value;
+        const url   = document.getElementById('ai').value.trim();
+        const p6    = parseFloat(document.getElementById('ap6').value);
+        const p12   = parseFloat(document.getElementById('ap12').value);
+        const p24   = parseFloat(document.getElementById('ap24').value);
 
-            async refreshData() {
-                this.state.products = await DataService.getCollection(DB_COLLECTIONS.PRODUCTS);
-                this.state.config = await DataService.getCollection(DB_COLLECTIONS.SETTINGS) || { whatsapp: '5511999999999' };
-            },
+        if (!name || isNaN(price) || price <= 0) { this.toast('Nome e preço são obrigatórios.', 'err'); return; }
 
-            // --- Ações de Carrinho ---
-            addToCart(productId) {
-                const product = this.state.products.find(p => p.id === productId);
-                if (!product) return;
+        const packs = [];
+        if (!isNaN(p6)  && p6  > 0) packs.push({ un:6,  price: p6  });
+        if (!isNaN(p12) && p12 > 0) packs.push({ un:12, price: p12 });
+        if (!isNaN(p24) && p24 > 0) packs.push({ un:24, price: p24 });
 
-                const existing = this.state.cart.find(i => i.id === productId);
-                if (existing) {
-                    existing.qty++;
-                } else {
-                    this.state.cart.push({ ...product, qty: 1 });
-                }
-                
-                this.renderCart();
-                this.showToast(`+1 ${product.name} adicionado!`);
-                
-                // Abre o carrinho automaticamente na primeira adição
-                if (this.state.cart.length === 1 && existing === undefined) {
-                    this.toggleCart();
-                }
-            },
+        const DEF = {
+            Cervejas:  'https://images.unsplash.com/photo-1618183182848-7076a54160a0?auto=format&fit=crop&w=500',
+            Destilados:'https://images.unsplash.com/photo-1613243555988-441166d4d6fd?auto=format&fit=crop&w=500',
+            Vinhos:    'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?auto=format&fit=crop&w=500',
+        };
+        const img = this.st.imgData || url || DEF[cat] ||
+            'https://images.unsplash.com/photo-1629205626372-d59663d86789?auto=format&fit=crop&w=500';
 
-            changeQty(index, delta) {
-                const item = this.state.cart[index];
-                item.qty += delta;
-                if (item.qty <= 0) this.state.cart.splice(index, 1);
-                this.renderCart();
-            },
+        DS.save({ id: crypto.randomUUID(), name, price, qty, cat, packs, img });
+        this.st.products = DS.all();
+        this.renderStore(); this.renderAdmin();
+        this.toast(`✅ "${name}" adicionado!`);
+        ['an','ap','aq','ap6','ap12','ap24','ai'].forEach(id => document.getElementById(id).value = '');
+        this._clearImg('uprv');
+    },
 
-            toggleCart() {
-                const drawer = document.getElementById('cart-drawer');
-                const backdrop = document.getElementById('backdrop');
-                const isHidden = drawer.classList.contains('translate-x-full');
+    /* ── EXCLUIR PRODUTO ── */
+    deleteProduct(id) {
+        if (!confirm('Remover este produto permanentemente?')) return;
+        DS.del(id); this.st.products = DS.all();
+        this.renderStore(); this.renderAdmin();
+        this.toast('Produto removido.');
+    },
 
-                if (isHidden) {
-                    drawer.classList.remove('translate-x-full');
-                    backdrop.classList.remove('hidden');
-                    setTimeout(() => backdrop.classList.remove('opacity-0'), 10);
-                    document.body.style.overflow = 'hidden'; // Previne scroll no body
-                } else {
-                    drawer.classList.add('translate-x-full');
-                    backdrop.classList.add('opacity-0');
-                    setTimeout(() => backdrop.classList.add('hidden'), 300);
-                    document.body.style.overflow = 'auto';
-                }
-            },
+    /* ── ABRIR MODAL DE EDIÇÃO ── */
+    openEdit(id) {
+        const p = this.st.products.find(x => x.id === id);
+        if (!p) return;
 
-            checkout() {
-                if (this.state.cart.length === 0) return this.showToast("Cesto vazio!", "error");
-                
-                const total = this.state.cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
-                let text = `🧊 *PEDIDO CH GELADAS*%0A%0A`;
-                
-                this.state.cart.forEach(item => {
-                    text += `▪ ${item.qty}x *${item.name}* (R$ ${(item.price * item.qty).toFixed(2)})%0A`;
-                });
-                
-                text += `%0A💰 *TOTAL: R$ ${total.toFixed(2).replace('.', ',')}*%0A%0A📍 *Aguardo confirmação do pedido.*`;
-                
-                const phone = this.state.config.whatsapp || "5511999999999";
-                window.open(`https://wa.me/${phone}?text=${text}`, '_blank');
-            },
+        // Preenche campos
+        document.getElementById('edit-id').value    = p.id;
+        document.getElementById('edit-name').value  = p.name;
+        document.getElementById('edit-price').value = p.price;
+        document.getElementById('edit-qty').value   = p.qty ?? 0;
+        document.getElementById('edit-cat').value   = p.cat;
+        document.getElementById('edit-subtitle').textContent = p.name;
+        document.getElementById('edit-img-url').value = '';
 
-            // --- Ações de UI ---
-            setFilter(category) {
-                this.state.activeFilter = category;
-                this.renderStore();
-            },
+        // Packs
+        const find = un => { const pk = (p.packs||[]).find(x=>x.un===un); return pk ? pk.price : ''; };
+        document.getElementById('edit-p6').value  = find(6);
+        document.getElementById('edit-p12').value = find(12);
+        document.getElementById('edit-p24').value = find(24);
 
-            verifyAge() {
-                localStorage.setItem('ch_age_verified_v2', 'true');
-                document.getElementById('age-modal').classList.add('opacity-0', 'pointer-events-none');
-                setTimeout(() => document.getElementById('age-modal').remove(), 500);
-            },
+        // Preview da foto atual
+        this.st.editImgData = null;
+        this._clearImg('edit-uprv');
+        if (p.img) {
+            document.getElementById('edit-img-thumb').src = p.img;
+            document.getElementById('edit-img-preview').classList.remove('hidden');
+        } else {
+            document.getElementById('edit-img-preview').classList.add('hidden');
+        }
 
-            toggleAdmin() {
-                if (this.state.isAdmin) {
-                    document.getElementById('admin-panel').classList.remove('hidden');
-                    document.getElementById('admin-panel').scrollIntoView({ behavior: 'smooth' });
-                } else {
-                    document.getElementById('password-modal').classList.remove('hidden');
-                    document.getElementById('password-modal').showModal();
-                }
-            },
+        document.getElementById('edit-modal').classList.remove('hidden');
+        setTimeout(() => document.getElementById('edit-name').focus(), 80);
+    },
 
-            verifyLogin() {
-                const pass = document.getElementById('pass-input').value;
-                if (pass === '@marianeecleiton') {
-                    this.state.isAdmin = true;
-                    sessionStorage.setItem('ch_admin_session', 'true');
-                    document.getElementById('password-modal').close();
-                    document.getElementById('password-modal').classList.add('hidden');
-                    this.renderAdmin();
-                    this.showToast("Acesso Admin Concedido 🔓");
-                    setTimeout(() => this.toggleAdmin(), 500);
-                } else {
-                    this.showToast("Senha Incorreta", "error");
-                    document.getElementById('pass-input').value = '';
-                }
-            },
+    closeEdit() {
+        document.getElementById('edit-modal').classList.add('hidden');
+        this.st.editImgData = null;
+    },
 
-            logoutAdmin() {
-                this.state.isAdmin = false;
-                sessionStorage.removeItem('ch_admin_session');
-                location.reload();
-            },
+    /* ── SALVAR EDIÇÃO ── */
+    saveEdit() {
+        const id    = document.getElementById('edit-id').value;
+        const name  = document.getElementById('edit-name').value.trim();
+        const price = parseFloat(document.getElementById('edit-price').value);
+        const qty   = parseInt(document.getElementById('edit-qty').value) || 0;
+        const cat   = document.getElementById('edit-cat').value;
+        const url   = document.getElementById('edit-img-url').value.trim();
+        const p6    = parseFloat(document.getElementById('edit-p6').value);
+        const p12   = parseFloat(document.getElementById('edit-p12').value);
+        const p24   = parseFloat(document.getElementById('edit-p24').value);
 
-            // --- Ações de Dados (Admin) ---
-            async createProduct() {
-                const name = document.getElementById('adm-name').value;
-                const price = parseFloat(document.getElementById('adm-price').value);
-                const category = document.getElementById('adm-cat').value;
-                const img = document.getElementById('adm-img').value;
+        if (!name || isNaN(price) || price <= 0) { this.toast('Nome e preço são obrigatórios.', 'err'); return; }
 
-                if (!name || isNaN(price)) return this.showToast("Preencha os dados obrigatórios", "error");
+        const packs = [];
+        if (!isNaN(p6)  && p6  > 0) packs.push({ un:6,  price: p6  });
+        if (!isNaN(p12) && p12 > 0) packs.push({ un:12, price: p12 });
+        if (!isNaN(p24) && p24 > 0) packs.push({ un:24, price: p24 });
 
-                const newProduct = {
-                    id: crypto.randomUUID(),
-                    name,
-                    price,
-                    category,
-                    img: img || "https://images.unsplash.com/photo-1629205626372-d59663d86789?auto=format&fit=crop&w=500"
-                };
+        const existing = this.st.products.find(x => x.id === id);
+        const img = this.st.editImgData || url || (existing ? existing.img : '');
 
-                await DataService.saveDocument(DB_COLLECTIONS.PRODUCTS, newProduct);
-                await this.refreshData();
-                this.renderStore();
-                this.renderAdmin();
-                this.showToast("Produto criado com sucesso!");
-                
-                // Limpa campos
-                document.getElementById('adm-name').value = '';
-                document.getElementById('adm-price').value = '';
-                document.getElementById('adm-img').value = '';
-            },
+        DS.save({ ...existing, id, name, price, qty, cat, packs, img });
+        this.st.products = DS.all();
+        this.renderStore(); this.renderAdmin();
+        this.closeEdit();
+        this.toast(`✅ "${name}" atualizado!`);
+    },
 
-            async deleteProduct(id) {
-                if (!confirm("Remover este item permanentemente?")) return;
-                await DataService.deleteDocument(DB_COLLECTIONS.PRODUCTS, id);
-                await this.refreshData();
-                this.renderStore();
-                this.renderAdmin();
-                this.showToast("Produto removido.");
-            },
+    /* ── CONFIGURAÇÕES (WhatsApp) ── */
+    async saveSettings() {
+        const num  = document.getElementById('awa').value.replace(/\D/g,'');
+        const pass = document.getElementById('awp').value;
+        if (num.length < 10) { this.toast('Número inválido (mínimo 10 dígitos).', 'err'); return; }
+        if (await sha256(pass) !== ADMIN_HASH) { this.toast('❌ Senha incorreta! Número não alterado.', 'err'); return; }
+        Sec.save(num); this.st.wa = num;
+        document.getElementById('wad').textContent = num.replace(/(\d{2})(\d{2})(\d{5})(\d{4})/,'+$1 ($2) $3-$4');
+        document.getElementById('awa').value = ''; document.getElementById('awp').value = '';
+        this.toast('✅ WhatsApp atualizado e protegido!');
+    },
 
-            async saveSettings() {
-                const whatsapp = document.getElementById('adm-whatsapp').value;
-                if (!whatsapp) return;
-                
-                await DataService.saveDocument(DB_COLLECTIONS.SETTINGS, { whatsapp });
-                await this.refreshData();
-                this.showToast("Configurações salvas!");
-            },
+    resetStore() {
+        if (!confirm('Apagar tudo e restaurar estoque padrão?')) return;
+        localStorage.removeItem(DBK); location.reload();
+    },
 
-            resetStore() {
-                if (confirm("ATENÇÃO: Isso apagará todos os produtos personalizados. Continuar?")) {
-                    localStorage.removeItem(DB_COLLECTIONS.PRODUCTS);
-                    localStorage.removeItem(DB_COLLECTIONS.SETTINGS);
-                    location.reload();
-                }
-            },
+    importBK() { document.getElementById('ifile').click(); },
+    processImport(e) {
+        const file = e.target.files[0]; if (!file) return;
+        const r = new FileReader();
+        r.onload = ev => {
+            try {
+                const json = JSON.parse(ev.target.result);
+                const raw  = json.estoque || json;
+                if (!Array.isArray(raw)) throw new Error('Formato inválido');
+                const CK = { 'vodka':'Destilados','coquetel':'Destilados','caninha':'Destilados',
+                              'vinho':'Vinhos','agua':'Águas','água':'Águas',
+                              'ref ':'Refrigerantes','refri':'Refrigerantes','refrigerante':'Refrigerantes',
+                              'energ':'Energéticos','suco':'Sucos' };
+                const gc = n => { const s = n.toLowerCase(); for(const[k,v]of Object.entries(CK)) if(s.includes(k)) return v; return 'Cervejas'; };
+                const mapped = raw.map(item => ({
+                    id: String(item.id || crypto.randomUUID()),
+                    name: item.nome || item.name || 'Produto',
+                    price: item.precoUn || item.price || 0,
+                    qty: item.qtdUn ?? item.qty ?? 0,
+                    cat: gc(item.nome || item.name || ''),
+                    packs: (item.packs||[]).map(pk=>({un:pk.un,price:pk.preco||pk.price||0})).filter(pk=>pk.price>0),
+                    img: item.img || ''
+                }));
+                localStorage.setItem(DBK, JSON.stringify(mapped));
+                this.st.products = DS.all(); this.renderStore(); this.renderAdmin();
+                this.toast(`✅ ${mapped.length} produtos importados!`);
+            } catch(err) { this.toast('❌ Erro: ' + err.message, 'err'); }
+        };
+        r.readAsText(file); e.target.value = '';
+    },
 
-            // --- Renderização ---
-            renderStore() {
-                // 1. Filtros
-                const categories = ['Todas', ...new Set(this.state.products.map(p => p.category))];
-                const filtersHtml = categories.map(cat => `
-                    <button onclick="App.setFilter('${cat}')" 
-                        class="px-6 py-2 rounded-full text-[11px] uppercase tracking-widest font-bold transition-all border whitespace-nowrap
-                        ${this.state.activeFilter === cat 
-                            ? 'bg-sky-500 text-white border-sky-500 shadow-lg shadow-sky-500/30 scale-105' 
-                            : 'bg-slate-900/50 text-slate-400 border-white/5 hover:border-sky-500/30 hover:text-white'}">
-                        ${cat}
-                    </button>
-                `).join('');
-                document.getElementById('category-filters').innerHTML = filtersHtml;
+    /* ── FILTRO INVENTÁRIO ADMIN ── */
+    filterInventory(v) {
+        this.st.invFilter = v.toLowerCase().trim();
+        this.renderAdmin();
+    },
 
-                // 2. Produtos
-                const filtered = this.state.activeFilter === 'Todas' 
-                    ? this.state.products 
-                    : this.state.products.filter(p => p.category === this.state.activeFilter);
+    /* ── CARRINHO ── */
+    addToCart(pid, pidx = -1) {
+        const p = this.st.products.find(x => x.id === pid); if (!p) return;
+        const key = `${pid}_${pidx}`;
+        const ex  = this.st.cart.find(i => i.key === key);
+        if (ex) { ex.qty++; }
+        else {
+            const pk = pidx >= 0 ? p.packs[pidx] : null;
+            this.st.cart.push({ ...p, qty:1, pidx, pk, key, up: pk ? pk.price : p.price,
+                                label: pk ? `Pack ${pk.un}un` : '1 unidade' });
+            if (this.st.cart.length === 1) setTimeout(() => this.toggleCart(), 300);
+        }
+        this.renderCart();
+        const lbl = pidx >= 0 ? `Pack ${p.packs[pidx].un}un` : '1un';
+        this.toast(`🧊 ${p.name} (${lbl})`);
+    },
+    changeQty(i, d) {
+        this.st.cart[i].qty += d;
+        if (this.st.cart[i].qty <= 0) this.st.cart.splice(i, 1);
+        this.renderCart();
+    },
+    toggleCart() {
+        const dr = document.getElementById('cart-drawer'), bk = document.getElementById('backdrop');
+        const op = !dr.classList.contains('translate-x-full');
+        if (op) {
+            dr.classList.add('translate-x-full'); bk.classList.add('opacity-0');
+            setTimeout(() => bk.classList.add('hidden'), 300); document.body.style.overflow = '';
+        } else {
+            dr.classList.remove('translate-x-full'); bk.classList.remove('hidden');
+            setTimeout(() => bk.classList.remove('opacity-0'), 10); document.body.style.overflow = 'hidden';
+        }
+    },
+    checkout() {
+        if (!this.st.cart.length) { this.toast('Pedido vazio!', 'err'); return; }
+        const total = this.st.cart.reduce((a,i) => a + i.up * i.qty, 0);
+        let msg = `🧊 *PEDIDO CH GELADAS*%0A%0A`;
+        this.st.cart.forEach(i => msg += `▪ ${i.qty}x *${i.name}* (${i.label}) — R$\u00a0${(i.up*i.qty).toFixed(2).replace('.',',')}%0A`);
+        msg += `%0A💰 *TOTAL: R$\u00a0${total.toFixed(2).replace('.',',')}*%0A%0A📍 Aguardo confirmação!`;
+        window.open(`https://wa.me/${Sec.read()}?text=${msg}`, '_blank');
+    },
 
-                const grid = document.getElementById('products-grid');
-                
-                if (filtered.length === 0) {
-                    grid.innerHTML = `<div class="col-span-full py-20 flex flex-col items-center justify-center opacity-40">
-                        <p class="text-sm font-bold uppercase tracking-widest text-slate-400">Nenhum item encontrado</p>
-                    </div>`;
-                    return;
-                }
+    selPack(pid, idx, el) {
+        document.getElementById(`c_${pid}`).querySelectorAll('.popt').forEach(e => e.classList.remove('sel'));
+        el.classList.add('sel');
+        this.st.picks[pid] = idx;
+        const p = this.st.products.find(x => x.id === pid); if (!p) return;
+        const price = idx >= 0 ? p.packs[idx].price : p.price;
+        document.getElementById(`pr_${pid}`).textContent = `R$\u00a0${price.toFixed(2).replace('.',',')}`;
+    },
+    doAdd(pid) { this.addToCart(pid, this.st.picks[pid] !== undefined ? this.st.picks[pid] : -1); },
+    setFilter(cat) { this.st.filter = cat; this.renderStore(); },
 
-                grid.innerHTML = filtered.map(p => `
-                    <div class="group relative bg-[#0f172a] rounded-[2rem] border border-white/5 overflow-hidden hover:border-sky-500/30 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-sky-500/10">
-                        <div class="h-64 overflow-hidden relative">
-                            <img src="${p.img}" onerror="this.src='https://placehold.co/600x400/1e293b/FFF?text=Sem+Imagem'" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-80 group-hover:opacity-100">
-                            <div class="absolute inset-0 bg-gradient-to-t from-[#0f172a] via-transparent to-transparent opacity-90"></div>
-                            <div class="absolute top-4 left-4 bg-sky-500/20 backdrop-blur-md border border-sky-500/20 text-sky-300 text-[9px] font-black px-3 py-1.5 rounded-lg uppercase tracking-wider">
-                                ${p.category}
-                            </div>
+    /* ═══════════════════════════════════════
+       RENDER STORE (vitrine pública)
+    ════════════════════════════════════════ */
+    renderStore() {
+        const cats = ['Todas', ...new Set(this.st.products.map(p => p.cat))];
+        document.getElementById('catfilters').innerHTML = cats.map(c => `
+            <button onclick="App.setFilter('${c}')" class="fpill${this.st.filter===c?' active':''}">
+                ${cm(c).e} ${c}
+            </button>`).join('');
+
+        let filtered = this.st.filter === 'Todas'
+            ? this.st.products
+            : this.st.products.filter(p => p.cat === this.st.filter);
+        if (this.st.search) filtered = filtered.filter(p =>
+            p.name.toLowerCase().includes(this.st.search) ||
+            p.cat.toLowerCase().includes(this.st.search));
+
+        document.getElementById('pcount').textContent =
+            `${filtered.length} produto${filtered.length!==1?'s':''} disponíve${filtered.length!==1?'is':'l'}`;
+
+        const grid = document.getElementById('pgrid');
+        if (!filtered.length) {
+            grid.innerHTML = `<div class="col-span-full flex flex-col items-center py-20 gap-3 opacity-30">
+                <svg class="w-10 h-10 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                          d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <p class="fd text-[10px] uppercase tracking-widest text-slate-500">Nenhum produto encontrado</p>
+            </div>`;
+            return;
+        }
+
+        grid.innerHTML = filtered.map((p, i) => {
+            const m    = cm(p.cat);
+            const stC  = p.qty > 20 ? 'sok' : p.qty > 0 ? 'slow' : 'sout';
+            const stT  = p.qty > 20 ? `${p.qty} un.` : p.qty > 0 ? `Últimas ${p.qty}!` : 'Esgotado';
+            const fb   = `https://placehold.co/500x400/0d1117/38bdf8?text=${encodeURIComponent(p.name.substring(0,12))}`;
+            const hp   = p.packs && p.packs.length > 0;
+            const cols = Math.min((hp ? p.packs.length : 0) + 1, 4);
+
+            const pkHtml = hp ? `
+                <div class="mt-3 space-y-1.5">
+                    <p class="text-[8px] uppercase font-bold tracking-wider" style="color:rgba(148,163,184,.4)">Escolha a quantidade</p>
+                    <div class="grid gap-1.5" style="grid-template-columns:repeat(${cols},1fr)">
+                        <div class="popt sel" onclick="App.selPack('${p.id}',-1,this)">
+                            <div class="pl">1 un.</div>
+                            <div class="pp">R$&nbsp;${p.price.toFixed(2).replace('.',',')}</div>
                         </div>
-                        <div class="p-6 relative -mt-12 z-10">
-                            <h3 class="text-lg font-bold text-white leading-tight mb-2 min-h-[3rem] text-shadow-sm">${p.name}</h3>
-                            <div class="flex justify-between items-end border-t border-white/5 pt-4 mt-2">
-                                <div>
-                                    <span class="text-[10px] text-slate-500 block uppercase font-bold tracking-wider mb-0.5">Valor Unitário</span>
-                                    <span class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400">R$ ${p.price.toFixed(2).replace('.', ',')}</span>
-                                </div>
-                                <button onclick="App.addToCart('${p.id}')" class="w-12 h-12 rounded-xl bg-sky-500 text-white flex items-center justify-center shadow-lg shadow-sky-500/20 hover:bg-sky-400 active:scale-95 transition-all hover:rotate-3">
-                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
-                                </button>
-                            </div>
-                        </div>
+                        ${p.packs.map((pk, idx) => {
+                            const sv = ((p.price * pk.un) - pk.price).toFixed(2);
+                            return `<div class="popt" onclick="App.selPack('${p.id}',${idx},this)">
+                                <div class="pl">${pk.un} un.</div>
+                                <div class="pp">R$&nbsp;${pk.price.toFixed(2).replace('.',',')}</div>
+                                ${parseFloat(sv)>0?`<div class="text-[7px] mt-0.5" style="color:#4ade80">-R$&nbsp;${sv}</div>`:''}
+                            </div>`;
+                        }).join('')}
                     </div>
-                `).join('');
-            },
+                </div>` : '';
 
-            renderCart() {
-                const container = document.getElementById('cart-items');
-                const badge = document.getElementById('cart-badge');
-                
-                const totalQty = this.state.cart.reduce((a, b) => a + b.qty, 0);
-                const totalPrice = this.state.cart.reduce((a, b) => a + (b.price * b.qty), 0);
-                
-                badge.innerText = totalQty;
-                badge.classList.toggle('opacity-0', totalQty === 0);
-                document.getElementById('cart-total').innerText = `R$ ${totalPrice.toFixed(2).replace('.', ',')}`;
-
-                if (this.state.cart.length === 0) {
-                    container.innerHTML = `
-                        <div class="flex flex-col items-center justify-center h-full opacity-30 gap-4">
-                            <svg class="w-20 h-20 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 11h14l1 12H4l1-12z"/></svg>
-                            <p class="font-bold uppercase tracking-widest text-slate-500">Seu cesto está vazio</p>
-                        </div>`;
-                    return;
-                }
-
-                container.innerHTML = this.state.cart.map((item, idx) => `
-                    <div class="flex gap-4 items-center bg-slate-900/40 p-3 rounded-2xl border border-white/5 hover:border-sky-500/20 transition-colors animate-[fadeIn_0.3s_ease]">
-                        <div class="w-16 h-16 rounded-xl overflow-hidden bg-slate-800 flex-shrink-0 relative">
-                            <img src="${item.img}" class="w-full h-full object-cover opacity-80">
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <h4 class="font-bold text-sm text-white truncate pr-2">${item.name}</h4>
-                            <p class="text-xs text-sky-400 font-mono mt-0.5">R$ ${(item.price * item.qty).toFixed(2)}</p>
-                        </div>
-                        <div class="flex items-center gap-3 bg-slate-950 rounded-lg p-1 border border-white/5">
-                            <button onclick="App.changeQty(${idx}, -1)" class="w-6 h-6 rounded flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10">-</button>
-                            <span class="text-xs font-bold w-4 text-center">${item.qty}</span>
-                            <button onclick="App.changeQty(${idx}, 1)" class="w-6 h-6 rounded flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10">+</button>
-                        </div>
+            return `
+            <div class="pc fu" style="animation-delay:${i*45}ms" id="c_${p.id}">
+                <div class="relative overflow-hidden" style="height:200px;background:var(--card)">
+                    <img src="${p.img||fb}" onerror="this.src='${fb}'"
+                         class="w-full h-full object-cover opacity-80 transition-transform duration-700 hover:scale-105" loading="lazy">
+                    <div class="absolute inset-0" style="background:linear-gradient(to top,var(--card) 0%,transparent 60%)"></div>
+                    <div class="absolute top-3 left-3 flex items-center gap-1 px-2 py-1 rounded-lg text-[8px] font-bold uppercase tracking-wider"
+                         style="background:${m.c};color:${m.t};border:1px solid ${m.c};backdrop-filter:blur(8px)">
+                        ${m.e} ${p.cat}
                     </div>
-                `).join('');
-            },
-
-            renderAdmin() {
-                const list = document.getElementById('admin-list');
-                document.getElementById('admin-panel').classList.remove('hidden');
-                document.getElementById('adm-whatsapp').value = this.state.config.whatsapp || '';
-                document.getElementById('inventory-count').innerText = `${this.state.products.length} itens`;
-
-                list.innerHTML = this.state.products.map(p => `
-                    <div class="flex items-center justify-between glass p-3 rounded-xl border border-white/5 group">
-                        <div class="flex items-center gap-3">
-                            <img src="${p.img}" class="w-10 h-10 rounded-lg object-cover bg-slate-800 grayscale group-hover:grayscale-0 transition-all">
-                            <div class="leading-tight">
-                                <p class="font-bold text-xs text-white group-hover:text-sky-300 transition-colors">${p.name}</p>
-                                <p class="text-[10px] text-slate-500 uppercase tracking-wider">${p.category}</p>
-                            </div>
+                    <div class="absolute top-3 right-3 stk ${stC}">${stT}</div>
+                </div>
+                <div class="p-4">
+                    <h3 class="fd text-[11px] font-bold text-white leading-snug">${p.name}</h3>
+                    ${pkHtml}
+                    <div class="flex justify-between items-center mt-3 pt-3" style="border-top:1px solid rgba(255,255,255,.04)">
+                        <div>
+                            <span class="block text-[8px] text-slate-600 uppercase tracking-widest font-bold mb-0.5">Preço</span>
+                            <span class="fd text-xl font-black text-white" id="pr_${p.id}">R$&nbsp;${p.price.toFixed(2).replace('.',',')}</span>
                         </div>
-                        <button onclick="App.deleteProduct('${p.id}')" class="w-8 h-8 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white flex items-center justify-center transition-all">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                        <button onclick="App.doAdd('${p.id}')" ${p.qty===0?'disabled':''}
+                            class="btn-ice w-11 h-11 rounded-xl text-white flex items-center justify-center flex-shrink-0">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6v12M6 12h12"/>
+                            </svg>
                         </button>
                     </div>
-                `).join('');
-            },
+                </div>
+            </div>`;
+        }).join('');
+    },
 
-            showToast(msg, type = 'success') {
-                const container = document.getElementById('toast-container');
-                const toast = document.createElement('div');
-                
-                const styles = type === 'success' 
-                    ? 'border-l-4 border-green-500 bg-slate-900/95 text-white' 
-                    : 'border-l-4 border-red-500 bg-slate-900/95 text-white';
-                
-                toast.className = `toast p-4 rounded-lg shadow-2xl flex items-center gap-3 min-w-[300px] backdrop-blur-md ${styles}`;
-                toast.innerHTML = `
-                    <span class="font-bold text-sm">${msg}</span>
-                `;
-                
-                container.appendChild(toast);
-                requestAnimationFrame(() => toast.classList.add('show'));
-                
-                setTimeout(() => {
-                    toast.classList.remove('show');
-                    setTimeout(() => toast.remove(), 500);
-                }, 3000);
-            }
-        };
+    /* ═══════════════════════════════════════
+       RENDER CART
+    ════════════════════════════════════════ */
+    renderCart() {
+        const tq = this.st.cart.reduce((a,i) => a+i.qty, 0);
+        const tp = this.st.cart.reduce((a,i) => a+i.up*i.qty, 0);
+        document.getElementById('cbadge').textContent = tq;
+        document.getElementById('cbadge').style.opacity = tq ? '1' : '.3';
+        document.getElementById('ctotal').textContent = `R$ ${tp.toFixed(2).replace('.',',')}`;
 
-        // Inicialização
-        document.addEventListener('DOMContentLoaded', () => {
-            App.init();
-        });
-    </script>
+        const c = document.getElementById('citems');
+        if (!this.st.cart.length) {
+            c.innerHTML = `<div class="flex flex-col items-center justify-center h-full gap-4 opacity-20">
+                <svg class="w-14 h-14 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                          d="M16 11V7a4 4 0 00-8 0v4M5 11h14l1 12H4l1-12z"/>
+                </svg>
+                <p class="fd font-bold uppercase tracking-widest text-slate-500 text-xs">Pedido vazio</p>
+            </div>`;
+            return;
+        }
+        const fb = 'https://placehold.co/100x100/0d1117/38bdf8?text=CH';
+        c.innerHTML = this.st.cart.map((item, idx) => `
+            <div class="flex gap-3 items-center p-3 rounded-2xl"
+                 style="background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.04)">
+                <div class="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 bg-slate-900">
+                    <img src="${item.img||fb}" onerror="this.src='${fb}'" class="w-full h-full object-cover opacity-80">
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h4 class="fd font-bold text-[10px] text-white truncate leading-snug">${item.name}</h4>
+                    <div class="flex items-center gap-1.5 mt-1">
+                        <span class="text-[8px] px-1.5 py-0.5 rounded font-bold"
+                              style="background:rgba(56,189,248,.1);color:#7dd3fc">${item.label}</span>
+                        <span class="text-[10px] text-sky-400 font-mono font-bold">
+                            R$&nbsp;${(item.up*item.qty).toFixed(2).replace('.',',')}
+                        </span>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 rounded-xl p-1"
+                     style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05)">
+                    <button onclick="App.changeQty(${idx},-1)"
+                        class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-all font-bold text-base">−</button>
+                    <span class="fd font-black text-white text-xs w-4 text-center">${item.qty}</span>
+                    <button onclick="App.changeQty(${idx},1)"
+                        class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-all font-bold text-base">+</button>
+                </div>
+            </div>`).join('');
+    },
+
+    /* ═══════════════════════════════════════
+       RENDER ADMIN (inventário)
+    ════════════════════════════════════════ */
+    renderAdmin() {
+        let products = this.st.products;
+
+        // Filtro interno
+        if (this.st.invFilter) {
+            products = products.filter(p =>
+                p.name.toLowerCase().includes(this.st.invFilter) ||
+                p.cat.toLowerCase().includes(this.st.invFilter));
+        }
+
+        const n = this.st.products.length;
+        document.getElementById('icount').textContent = `${n} ite${n!==1?'ns':'m'}`;
+        document.getElementById('apanel').classList.remove('hidden');
+
+        const fb = 'https://placehold.co/100x100/0d1117/38bdf8?text=CH';
+        const list = document.getElementById('alist');
+
+        if (!products.length) {
+            list.innerHTML = `<div class="text-center py-12 opacity-30">
+                <p class="fd text-[10px] uppercase tracking-widest text-slate-500">Nenhum produto</p>
+            </div>`;
+            return;
+        }
+
+        list.innerHTML = products.map(p => {
+            const m = cm(p.cat);
+            return `
+            <div class="inv-item group">
+                <!-- Thumb -->
+                <div class="w-12 h-12 rounded-xl overflow-hidden bg-slate-800 flex-shrink-0">
+                    <img src="${p.img||fb}" onerror="this.src='${fb}'"
+                         class="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-all" loading="lazy">
+                </div>
+
+                <!-- Info -->
+                <div class="flex-1 min-w-0">
+                    <p class="fd font-bold text-[10px] text-white group-hover:text-sky-300 transition-colors leading-snug truncate">
+                        ${p.name}
+                    </p>
+                    <div class="flex items-center gap-2 mt-0.5 flex-wrap">
+                        <span class="text-[8px] px-1.5 py-0.5 rounded font-bold"
+                              style="background:${m.c};color:${m.t}">${m.e} ${p.cat}</span>
+                        <span class="text-[9px] text-sky-400/70 font-mono font-bold">
+                            R$&nbsp;${p.price.toFixed(2).replace('.',',')}
+                        </span>
+                        <span class="text-[8px] font-bold ${p.qty>20?'text-green-500':p.qty>0?'text-yellow-400':'text-red-400'}">
+                            ${p.qty} un
+                        </span>
+                        ${p.packs&&p.packs.length
+                            ? `<span class="text-[8px] text-slate-600">+${p.packs.length} pack${p.packs.length>1?'s':''}</span>`
+                            : ''}
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex items-center gap-1.5 flex-shrink-0">
+                    <!-- EDITAR -->
+                    <button onclick="App.openEdit('${p.id}')"
+                        class="w-8 h-8 rounded-xl flex items-center justify-center
+                               text-sky-500/60 hover:text-white hover:bg-sky-500 transition-all
+                               border border-sky-500/10 hover:border-sky-500"
+                        title="Editar">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                    </button>
+                    <!-- EXCLUIR -->
+                    <button onclick="App.deleteProduct('${p.id}')"
+                        class="w-8 h-8 rounded-xl flex items-center justify-center
+                               text-red-500/50 hover:text-white hover:bg-red-500 transition-all
+                               border border-red-500/10 hover:border-red-500"
+                        title="Excluir">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>`;
+        }).join('');
+    },
+
+    /* ── TOAST ── */
+    toast(msg, type = 'ok') {
+        const c = document.getElementById('toast-c');
+        const t = document.createElement('div');
+        const ok = type === 'ok';
+        t.className = 'toast rounded-2xl px-4 py-3 flex items-center gap-3 shadow-2xl';
+        t.style.cssText = `background:${ok?'rgba(13,17,23,.98)':'rgba(20,0,0,.98)'};
+            border:1px solid ${ok?'rgba(34,197,94,.18)':'rgba(239,68,68,.18)'};
+            backdrop-filter:blur(16px);min-width:230px;`;
+        t.innerHTML = `<span class="text-sm font-semibold text-white">${msg}</span>`;
+        c.appendChild(t);
+        requestAnimationFrame(() => t.classList.add('show'));
+        setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 500); }, 3500);
+    }
+};
+
+document.addEventListener('DOMContentLoaded', () => App.init());
+</script>
 </body>
 </html>
