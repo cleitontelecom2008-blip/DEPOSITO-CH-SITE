@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CH Geladas — Diagnóstico PWA</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, sans-serif; background: #060810; color: #f1f5f9; padding: 1rem; }
+  h1 { font-size: 1.1rem; font-weight: 900; margin-bottom: 1rem; color: #60a5fa; }
+  .card { background: #0d1117; border: 1px solid rgba(255,255,255,.08); border-radius: 1rem; padding: 1rem; margin-bottom: .75rem; }
+  .row { display: flex; justify-content: space-between; align-items: center; padding: .4rem 0; border-bottom: 1px solid rgba(255,255,255,.05); }
+  .row:last-child { border: none; }
+  .label { font-size: .75rem; font-weight: 700; color: #94a3b8; }
+  .val { font-size: .75rem; font-weight: 900; }
+  .ok  { color: #34d399; }
+  .err { color: #f87171; }
+  .warn{ color: #fbbf24; }
+  .btn { display: block; width: 100%; padding: 1rem; border-radius: .75rem; border: none;
+         font-size: .85rem; font-weight: 900; text-transform: uppercase; letter-spacing: .05em;
+         cursor: pointer; margin-top: .5rem; transition: all .15s; }
+  .btn-blue  { background: #3b82f6; color: #fff; }
+  .btn-green { background: #10b981; color: #fff; }
+  .btn-slate { background: #334155; color: #94a3b8; }
+  .btn:active { transform: scale(.97); }
+  pre { font-size: .65rem; color: #64748b; white-space: pre-wrap; margin-top: .5rem; }
+  #log { font-size: .65rem; color: #475569; font-family: monospace; margin-top: .5rem; line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<h1>🔍 Diagnóstico PWA — CH Geladas</h1>
+
+<!-- Status em tempo real -->
+<div class="card" id="cardStatus">
+  <div class="row"><span class="label">HTTPS</span><span class="val" id="sHttps">…</span></div>
+  <div class="row"><span class="label">Service Worker</span><span class="val" id="sSW">…</span></div>
+  <div class="row"><span class="label">SW Estado</span><span class="val" id="sSwState">…</span></div>
+  <div class="row"><span class="label">Manifest</span><span class="val" id="sManifest">…</span></div>
+  <div class="row"><span class="label">Ícone 192px</span><span class="val" id="sIcon192">…</span></div>
+  <div class="row"><span class="label">Ícone 512px</span><span class="val" id="sIcon512">…</span></div>
+  <div class="row"><span class="label">Install Prompt</span><span class="val" id="sPrompt">Aguardando…</span></div>
+  <div class="row"><span class="label">Já instalado</span><span class="val" id="sInstalled">…</span></div>
+</div>
+
+<!-- Ação -->
+<div class="card">
+  <button class="btn btn-blue" id="btnInstall" style="display:none" onclick="instalar()">
+    📲 Instalar App
+  </button>
+  <button class="btn btn-green" onclick="testarPrincipal()">
+    🔗 Abrir app principal
+  </button>
+  <button class="btn btn-slate" style="margin-top:.5rem" onclick="forcarSW()">
+    🔄 Forçar atualização SW
+  </button>
+</div>
+
+<!-- Instruções manuais -->
+<div class="card">
+  <p style="font-size:.75rem;font-weight:900;color:#fbbf24;margin-bottom:.5rem">
+    📱 Instalar manualmente (sempre funciona):
+  </p>
+  <p style="font-size:.72rem;color:#94a3b8;line-height:1.7">
+    <b style="color:#f1f5f9">Android Chrome:</b><br>
+    Menu ⋮ (3 pontinhos) → <b style="color:#60a5fa">"Adicionar à tela inicial"</b><br><br>
+    <b style="color:#f1f5f9">iOS Safari:</b><br>
+    Botão compartilhar □↑ → <b style="color:#60a5fa">"Adicionar à Tela de Início"</b>
+  </p>
+</div>
+
+<!-- Log técnico -->
+<div class="card">
+  <p style="font-size:.65rem;font-weight:900;color:#475569;margin-bottom:.3rem">LOG TÉCNICO</p>
+  <div id="log"></div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const log = msg => { $('log').innerHTML += msg + '<br>'; console.log(msg); };
+const ok  = (id, txt) => { $(id).textContent = txt; $(id).className = 'val ok'; };
+const err = (id, txt) => { $(id).textContent = txt; $(id).className = 'val err'; };
+const warn= (id, txt) => { $(id).textContent = txt; $(id).className = 'val warn'; };
+
+let _deferredPrompt = null;
+
+// ── 1. HTTPS ─────────────────────────────────────────────────
+if (location.protocol === 'https:') {
+  ok('sHttps', '✅ ' + location.hostname);
+} else {
+  err('sHttps', '❌ ' + location.protocol + ' (precisa HTTPS)');
+}
+
+// ── 2. Service Worker ────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  warn('sSW', '⏳ Registrando…');
+
+  navigator.serviceWorker.register('/sw.js')
+    .then(reg => {
+      ok('sSW', '✅ Registrado');
+      log('SW scope: ' + reg.scope);
+
+      const state = reg.active ? 'ativo' : reg.installing ? 'instalando' : reg.waiting ? 'esperando' : '?';
+      ok('sSwState', '✅ ' + state);
+
+      reg.addEventListener('updatefound', () => {
+        log('SW: nova versão encontrada');
+        warn('sSwState', '🔄 Atualizando…');
+      });
+    })
+    .catch(e => {
+      err('sSW', '❌ ' + e.message);
+      err('sSwState', '❌ falhou');
+      log('SW erro: ' + e.message);
+    });
+} else {
+  err('sSW', '❌ Não suportado neste browser');
+  err('sSwState', '—');
+}
+
+// ── 3. Manifest ──────────────────────────────────────────────
+fetch('/manifest.json')
+  .then(r => r.ok ? r.json() : Promise.reject('HTTP ' + r.status))
+  .then(m => {
+    ok('sManifest', '✅ ' + (m.name || 'ok'));
+    log('Manifest: name=' + m.name + ', start_url=' + m.start_url);
+  })
+  .catch(e => {
+    err('sManifest', '❌ ' + e);
+    log('Manifest erro: ' + e);
+  });
+
+// ── 4. Ícones ────────────────────────────────────────────────
+[192, 512].forEach(sz => {
+  const img = new Image();
+  img.onload  = () => ok('sIcon' + sz, '✅ ' + sz + 'x' + sz);
+  img.onerror = () => {
+    err('sIcon' + sz, '❌ Não encontrado');
+    log('Ícone ' + sz + 'px: 404 ou erro');
+  };
+  img.src = '/icons/icon-' + sz + '.png?' + Date.now();
+});
+
+// ── 5. Install Prompt ────────────────────────────────────────
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  _deferredPrompt = e;
+  ok('sPrompt', '✅ Pronto para instalar!');
+  $('btnInstall').style.display = 'block';
+  log('beforeinstallprompt recebido');
+});
+
+window.addEventListener('appinstalled', () => {
+  ok('sPrompt', '✅ Instalado!');
+  ok('sInstalled', '✅ Sim');
+  $('btnInstall').style.display = 'none';
+  log('App instalado com sucesso');
+});
+
+// ── 6. Já instalado? ─────────────────────────────────────────
+if (window.matchMedia('(display-mode: standalone)').matches || navigator.standalone) {
+  ok('sInstalled', '✅ Sim (rodando como app)');
+} else {
+  warn('sInstalled', '⚠️ Não (rodando no browser)');
+}
+
+// ── Funções dos botões ───────────────────────────────────────
+async function instalar() {
+  if (!_deferredPrompt) {
+    alert('Prompt não disponível. Use o menu ⋮ → "Adicionar à tela inicial"');
+    return;
+  }
+  _deferredPrompt.prompt();
+  const { outcome } = await _deferredPrompt.userChoice;
+  log('Resultado: ' + outcome);
+  _deferredPrompt = null;
+}
+
+function testarPrincipal() {
+  location.href = '/';
+}
+
+function forcarSW() {
+  if (!navigator.serviceWorker) { alert('SW não suportado'); return; }
+  navigator.serviceWorker.getRegistrations().then(regs => {
+    Promise.all(regs.map(r => r.unregister())).then(() => {
+      log('SW removido — recarregando...');
+      location.reload(true);
+    });
+  });
+}
+
+// Timeout: se o prompt não veio em 5s, explica o motivo
+setTimeout(() => {
+  if (!_deferredPrompt) {
+    const el = $('sPrompt');
+    if (!el.classList.contains('ok')) {
+      warn('sPrompt', '⚠️ Não disparou');
+      log('Possíveis causas:');
+      log('• Prompt já foi recusado antes (Chrome bloqueia por 3 meses)');
+      log('• App já está instalado');
+      log('• Ícone 192px ou 512px com erro');
+      log('• SW não ativou ainda');
+      log('→ Use o menu ⋮ → "Adicionar à tela inicial" manualmente');
+    }
+  }
+}, 5000);
+</script>
+</body>
+</html>
