@@ -700,7 +700,13 @@ const UIService = (() => {
     if (pin) {
       // Garante que aceita até 5 dígitos (PIN PDV = 12345)
       pin.maxLength = 6;
-      setTimeout(() => pin.focus(), 200);
+      setTimeout(() => pin.focus(), 300);
+      // Garante abertura do teclado ao tocar na tela (PWA offline)
+      const lockEl = Utils.el('lock');
+      if (lockEl && !lockEl._tapBound) {
+        lockEl._tapBound = true;
+        lockEl.addEventListener('click', () => { Utils.el('pinInput')?.focus(); });
+      }
       if (!pin._enterBound) {
         pin._enterBound = true;
         pin.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
