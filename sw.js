@@ -43,8 +43,15 @@ const APP_SHELL = [
   '/firebase.js',
   '/sync.js',
   '/manifest.json',
+];
+
+/** Ícones: cacheados separadamente (não bloqueiam o install se falharem) */
+const ICONS_SHELL = [
   '/icons/icon-192.png',
   '/icons/icon-512.png',
+  '/icons/icon-144.png',
+  '/icons/icon-96.png',
+  '/icons/icon-72.png',
 ];
 
 /** CDN externos: servidos Stale-While-Revalidate */
@@ -73,13 +80,21 @@ self.addEventListener('install', event => {
     caches.open(CACHE_VERSION).then(cache => {
       // addAll() falha atomicamente — se um recurso falhar, nenhum é cacheado.
       // Usamos Promise.allSettled para não bloquear se um ícone faltar.
-      return Promise.allSettled(
+      // App Shell obrigatório
+      await Promise.allSettled(
         APP_SHELL.map(url =>
           cache.add(url).catch(err =>
             console.warn(`[SW] Falha ao cachear ${url}:`, err.message)
           )
         )
       );
+      // Ícones opcionais — não travam o install se falharem
+      await Promise.allSettled(
+        ICONS_SHELL.map(url =>
+          cache.add(url).catch(() => null)
+        )
+      );
+      return Promise.resolve();
     }).then(() => {
       console.info('[SW] App Shell cacheado');
       // Ativa imediatamente sem esperar abas antigas fecharem
