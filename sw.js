@@ -43,15 +43,8 @@ const APP_SHELL = [
   '/firebase.js',
   '/sync.js',
   '/manifest.json',
-];
-
-/** Ícones: cacheados separadamente (não bloqueiam o install se falharem) */
-const ICONS_SHELL = [
   '/icons/icon-192.png',
   '/icons/icon-512.png',
-  '/icons/icon-144.png',
-  '/icons/icon-96.png',
-  '/icons/icon-72.png',
 ];
 
 /** CDN externos: servidos Stale-While-Revalidate */
@@ -80,21 +73,13 @@ self.addEventListener('install', event => {
     caches.open(CACHE_VERSION).then(cache => {
       // addAll() falha atomicamente — se um recurso falhar, nenhum é cacheado.
       // Usamos Promise.allSettled para não bloquear se um ícone faltar.
-      // App Shell obrigatório
-      await Promise.allSettled(
+      return Promise.allSettled(
         APP_SHELL.map(url =>
           cache.add(url).catch(err =>
             console.warn(`[SW] Falha ao cachear ${url}:`, err.message)
           )
         )
       );
-      // Ícones opcionais — não travam o install se falharem
-      await Promise.allSettled(
-        ICONS_SHELL.map(url =>
-          cache.add(url).catch(() => null)
-        )
-      );
-      return Promise.resolve();
     }).then(() => {
       console.info('[SW] App Shell cacheado');
       // Ativa imediatamente sem esperar abas antigas fecharem
@@ -149,6 +134,14 @@ self.addEventListener('fetch', event => {
     return;
   }
 
+  // ── Navegação HTML (refresh, abertura) → SPA offline fallback ──
+  // Qualquer request de "document" (ex: /, /?pwa=1, /#pdv) serve
+  // o index.html do cache diretamente — evita tela branca no refresh offline.
+  if (request.destination === 'document' || request.mode === 'navigate') {
+    event.respondWith(_navigateOffline(request));
+    return;
+  }
+
   // ── App Shell (same-origin) → Cache First ──────────────────────
   if (url.origin === self.location.origin) {
     event.respondWith(_cacheFirst(request));
@@ -164,26 +157,64 @@ self.addEventListener('fetch', event => {
 ═══════════════════════════════════════════════════════════════════ */
 
 /**
+ * Navigate Offline: para requests de navegação (refresh, abertura do app).
+ * Tenta rede primeiro; se falhar, serve /index.html do cache.
+ * ignoreSearch:true garante que /?pwa=1, /#pdv etc. batem no cache correto.
+ */
+async function _navigateOffline(request) {
+  try {
+    // Online: busca da rede e atualiza cache
+    const response = await fetch(request);
+    if (response.ok) {
+      const cache = await caches.open(CACHE_VERSION);
+      // Sempre guarda como /index.html para garantir o fallback
+      cache.put('/index.html', response.clone());
+    }
+    return response;
+  } catch {
+    // Offline: serve index.html do cache (ignora query string e hash)
+    const cached =
+      await caches.match('/index.html') ||
+      await caches.match('/', { ignoreSearch: true }) ||
+      await caches.match(request, { ignoreSearch: true });
+    if (cached) return cached;
+    // Último recurso: página de offline embutida
+    return new Response(
+      '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">' +
+      '<meta name="viewport" content="width=device-width,initial-scale=1">' +
+      '<title>CH Geladas — Offline</title>' +
+      '<style>body{font-family:sans-serif;background:#060810;color:#f1f5f9;' +
+      'display:flex;flex-direction:column;align-items:center;justify-content:center;' +
+      'min-height:100vh;text-align:center;gap:1rem;padding:2rem}' +
+      'h1{font-size:2rem}p{color:#64748b;font-size:.9rem}' +
+      'button{background:#3b82f6;color:#fff;border:none;padding:.8rem 2rem;' +
+      'border-radius:.75rem;font-size:1rem;font-weight:700;cursor:pointer}</style></head>' +
+      '<body><h1>🍺</h1><h2>CH Geladas</h2>' +
+      '<p>Sem conexão com a internet.<br>Conecte e reabra o app.</p>' +
+      '<button onclick="location.reload()">Tentar novamente</button>' +
+      '</body></html>',
+      { status: 200, headers: { 'Content-Type': 'text/html;charset=utf-8' } }
+    );
+  }
+}
+
+/**
  * Cache First: serve do cache, busca na rede só se não encontrar.
- * Ideal para App Shell — zero latência no boot.
+ * Ideal para App Shell (JS, CSS, ícones) — zero latência no boot.
  */
 async function _cacheFirst(request) {
-  const cached = await caches.match(request);
+  // ignoreSearch: /?v=123 e / batem no mesmo cache
+  const cached = await caches.match(request, { ignoreSearch: true });
   if (cached) return cached;
 
   try {
     const response = await fetch(request);
     if (response.ok) {
       const cache = await caches.open(CACHE_VERSION);
-      cache.put(request, response.clone()); // armazena para próxima vez
+      cache.put(request, response.clone());
     }
     return response;
   } catch {
-    // Recurso não disponível e não está no cache
-    // Para navegação (HTML), retorna o index.html cacheado (SPA fallback)
-    if (request.destination === 'document') {
-      return caches.match('/index.html');
-    }
     return new Response('Offline', { status: 503, statusText: 'Service Unavailable' });
   }
 }
