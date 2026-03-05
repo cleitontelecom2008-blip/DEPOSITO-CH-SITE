@@ -513,8 +513,8 @@ const ComandaFechamento = (() => {
     if (trocoInput) trocoInput.value = '';
     const trocoValor = Utils.el('cmdTrocoValor');
     if (trocoValor) trocoValor.textContent = 'R$ 0,00';
-    const btnDinheiro = Utils.el('btnCmdDinheiro');
-    if (btnDinheiro) btnDinheiro.classList.remove('ring-2', 'ring-emerald-400');
+    const btnDin = Utils.el('btnCmdDinheiro');
+    if (btnDin) btnDin.classList.remove('ring-2', 'ring-emerald-400');
 
     const nome = Utils.el('cmdFechNome');
     if (nome) nome.textContent = c.nome;
@@ -630,7 +630,7 @@ function cmdSelecionarDinheiro() {
   const btn = Utils.el('btnCmdDinheiro');
   if (btn) btn.classList.add('ring-2', 'ring-emerald-400');
   const input = Utils.el('cmdTrocoInput');
-  if (input) setTimeout(() => input.focus(), 50);
+  if (input) { input.value = ''; setTimeout(() => input.focus(), 50); }
   cmdCalcularTroco();
 }
 
@@ -640,21 +640,25 @@ function cmdCalcularTroco() {
   const trocoEl  = Utils.el('cmdTrocoValor');
   if (!totalEl || !inputEl || !trocoEl) return;
 
-  const totalStr  = totalEl.textContent.replace(/[^\d,]/g, '').replace(',', '.');
-  const total     = parseFloat(totalStr) || 0;
-  const recebido  = parseFloat(inputEl.value) || 0;
-  const troco     = Math.max(0, recebido - total);
+  // cmdFechTotal: "R$ 25,00" — remove tudo exceto dígitos, ponto e vírgula
+  const raw      = totalEl.textContent.replace(/[^\d,.]/g, '');
+  const totalStr = raw.replace(/\./g, '').replace(',', '.');
+  const total    = parseFloat(totalStr) || 0;
+  const recebido = parseFloat(inputEl.value) || 0;
+  const troco    = Math.max(0, recebido - total);
 
-  trocoEl.textContent   = Utils.formatCurrency(troco);
-  trocoEl.style.color   = troco > 0 ? '' : 'var(--tw-text-opacity, #6b7280)';
+  trocoEl.textContent = Utils.formatCurrency(troco);
+  trocoEl.style.color = troco > 0 ? '#34d399' : '#6b7280';
 }
 
 function cmdConfirmarPgtoDinheiro() {
   const totalEl  = Utils.el('cmdFechTotal');
   const inputEl  = Utils.el('cmdTrocoInput');
-  const recebido = parseFloat(inputEl?.value) || 0;
-  const totalStr = totalEl?.textContent.replace(/[^\d,]/g, '').replace(',', '.') || '0';
+
+  const raw      = totalEl?.textContent.replace(/[^\d,.]/g, '') || '0';
+  const totalStr = raw.replace(/\./g, '').replace(',', '.');
   const total    = parseFloat(totalStr) || 0;
+  const recebido = parseFloat(inputEl?.value) || 0;
 
   if (recebido > 0 && recebido < total) {
     UIService.showToast('Atenção', 'Valor recebido menor que o total!', 'error');

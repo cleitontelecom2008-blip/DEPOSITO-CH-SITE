@@ -21,7 +21,7 @@ const CONSTANTS = Object.freeze({
   STORAGE_KEY: 'CH_GELADAS_DB_ENTERPRISE',
   SYNC_LOCK_DURATION_MS: 6_000,
   TOAST_DURATION_MS: 2_800,
-  SYNC_FALLBACK_MS: 4_500, // ligeiramente > RESTORE_TIMEOUT_MS (4s) para o Firestore sempre terminar primeiro
+  SYNC_FALLBACK_MS: 5_000,
   CART_ANIMATION_MS: 400,
   DEBOUNCE_SAVE_MS: 300,
   LOCALE: 'pt-BR',
@@ -554,7 +554,6 @@ const AuthService = (() => {
       UIService.showToast('PIN Inválido', remaining > 0 ? `${remaining} tentativa(s) restante(s)` : 'Conta bloqueada', 'error');
       const pinEl = Utils.el('pinInput');
       if (pinEl) pinEl.value = '';
-      if (typeof window._kpReset === 'function') window._kpReset();
       return false;
     }
 
@@ -696,8 +695,73 @@ const UIService = (() => {
     if (lock) lock.style.display = 'flex';
     const app = Utils.el('app');
     if (app)  app.style.display  = 'none';
-    // Resetar o teclado personalizado ao mostrar o ecrã de bloqueio
-    if (typeof window._kpReset === 'function') window._kpReset();
+
+    const pin = Utils.el('pinInput');
+    if (pin) {
+      pin.maxLength = 6;
+
+      // Tenta focar — só funciona se houver gesto do utilizador
+      setTimeout(() => {
+        pin.focus();
+        // Após o attempt de focus, verifica se o teclado realmente abriu
+        setTimeout(() => {
+          if (document.activeElement !== pin) {
+            _showTapToTypeBtn(pin);
+          }
+        }, 150);
+      }, 300);
+
+      // Clique em qualquer ponto do lock também tenta abrir o teclado
+      const lockEl = Utils.el('lock');
+      if (lockEl && !lockEl._tapBound) {
+        lockEl._tapBound = true;
+        lockEl.addEventListener('click', () => {
+          Utils.el('pinInput')?.focus();
+          _removeTapToTypeBtn();
+        });
+      }
+
+      if (!pin._enterBound) {
+        pin._enterBound = true;
+        pin.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+      }
+    }
+  }
+
+  /* Botão flutuante "Toque para digitar" — aparece quando o foco
+     é bloqueado pelo browser (PWA offline sem gesto do utilizador) */
+  function _showTapToTypeBtn(pin) {
+    if (document.getElementById('_tapToTypeBtn')) return; // já existe
+    const btn = document.createElement('button');
+    btn.id = '_tapToTypeBtn';
+    btn.textContent = '⌨️ Toque para digitar';
+    btn.style.cssText = [
+      'position:fixed',
+      'bottom:40px',
+      'left:50%',
+      'transform:translateX(-50%)',
+      'padding:14px 28px',
+      'font-size:16px',
+      'font-family:inherit',
+      'background:#1a73e8',
+      'color:#fff',
+      'border:none',
+      'border-radius:24px',
+      'box-shadow:0 4px 16px rgba(0,0,0,0.35)',
+      'z-index:99999',
+      'cursor:pointer',
+      'white-space:nowrap',
+    ].join(';');
+    // Este clique É um gesto humano real → o browser permite o focus + teclado
+    btn.addEventListener('click', () => {
+      (pin || Utils.el('pinInput'))?.focus();
+      btn.remove();
+    });
+    document.body.appendChild(btn);
+  }
+
+  function _removeTapToTypeBtn() {
+    document.getElementById('_tapToTypeBtn')?.remove();
   }
 
   function showApp() {
@@ -1233,6 +1297,17 @@ const VendaService = (() => {
 
     const resumoEl = Utils.el('vendaResumo');
     if (resumoEl) resumoEl.textContent = `Total: ${Utils.formatCurrency(CartService.getTotal())}`;
+
+    // Reset seção de troco
+    const trocoSection = Utils.el('pdvTrocoSection');
+    if (trocoSection) trocoSection.classList.add('hidden');
+    const trocoInput = Utils.el('pdvTrocoInput');
+    if (trocoInput) trocoInput.value = '';
+    const trocoValor = Utils.el('pdvTrocoValor');
+    if (trocoValor) trocoValor.textContent = 'R$ 0,00';
+    const btnDin = Utils.el('btnPdvDinheiro');
+    if (btnDin) btnDin.classList.remove('ring-2', 'ring-emerald-400', 'bg-emerald-500/30');
+
     UIService.openModal('modalPagamento');
   }
 
@@ -1537,6 +1612,57 @@ function fecharModalVenda()      { VendaService.fecharModalVenda(); }
 function baixarTxt()             { VendaService.baixarComprovante(); }
 function enviarWhatsapp()        { VendaService.enviarWhatsapp(); }
 
+function pdvSelecionarDinheiro() {
+  const section = Utils.el('pdvTrocoSection');
+  if (section) section.classList.remove('hidden');
+  const btn = Utils.el('btnPdvDinheiro');
+  if (btn) btn.classList.add('ring-2', 'ring-emerald-400', 'bg-emerald-500/30');
+  const input = Utils.el('pdvTrocoInput');
+  if (input) { input.value = ''; setTimeout(() => input.focus(), 50); }
+  pdvCalcularTroco();
+}
+
+function pdvCalcularTroco() {
+  const resumoEl = Utils.el('vendaResumo');
+  const inputEl  = Utils.el('pdvTrocoInput');
+  const trocoEl  = Utils.el('pdvTrocoValor');
+  if (!resumoEl || !inputEl || !trocoEl) return;
+
+  // vendaResumo: "Total: R$ 25,00"
+  const match   = resumoEl.textContent.match(/[\d.,]+(?:,\d{2})?/);
+  const totalStr = match ? match[0].replace(/\./g, '').replace(',', '.') : '0';
+  const total    = parseFloat(totalStr) || 0;
+  const recebido = parseFloat(inputEl.value) || 0;
+  const troco    = Math.max(0, recebido - total);
+
+  trocoEl.textContent = Utils.formatCurrency(troco);
+  trocoEl.style.color = troco > 0 ? '#34d399' : '#6b7280';
+}
+
+function pdvConfirmarDinheiro() {
+  const resumoEl = Utils.el('vendaResumo');
+  const inputEl  = Utils.el('pdvTrocoInput');
+  const trocoEl  = Utils.el('pdvTrocoValor');
+
+  const match    = resumoEl?.textContent.match(/[\d.,]+(?:,\d{2})?/);
+  const totalStr = match ? match[0].replace(/\./g, '').replace(',', '.') : '0';
+  const total    = parseFloat(totalStr) || 0;
+  const recebido = parseFloat(inputEl?.value) || 0;
+
+  if (recebido > 0 && recebido < total) {
+    UIService.showToast('Atenção', 'Valor recebido menor que o total!', 'error');
+    return;
+  }
+
+  // Esconde seção e reseta para próxima abertura
+  const section = Utils.el('pdvTrocoSection');
+  if (section) section.classList.add('hidden');
+  const btn = Utils.el('btnPdvDinheiro');
+  if (btn) btn.classList.remove('ring-2', 'ring-emerald-400', 'bg-emerald-500/30');
+
+  confirmarPagamento('Dinheiro');
+}
+
 function salvarZap() {
   const raw = Utils.el('zapNum')?.value || '';
   Store.mutate(state => { state.config.whatsapp = raw.replace(/\D/g, ''); }, true);
@@ -1546,14 +1672,10 @@ function salvarZap() {
 }
 
 /** Login assíncrono com PIN */
-async function doLogin(pinArg) {
-  const pin = pinArg !== undefined ? String(pinArg) : (Utils.el('pinInput')?.value || '');
-  if (!pin) return; // guarda extra: nunca tenta com PIN vazio
+async function doLogin() {
+  const pin = Utils.el('pinInput')?.value || '';
   const success = await AuthService.login(pin);
-  if (success) {
-    if (typeof window._kpReset === 'function') window._kpReset();
-    Bootstrap.onLoginSuccess(AuthService.getRole());
-  }
+  if (success) Bootstrap.onLoginSuccess(AuthService.getRole());
 }
 
 /**
