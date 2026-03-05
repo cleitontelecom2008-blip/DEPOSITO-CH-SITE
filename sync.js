@@ -32,9 +32,10 @@ const STORAGE_KEY          = 'CH_GELADAS_DB_ENTERPRISE';
 const FIRESTORE_COLLECTION = 'ch_geladas';
 const FIRESTORE_DOC_ID     = 'sistema';
 
-const FIREBASE_WAIT_MS     = 5_000;   // timeout aguardando Firebase inicializar
+const FIREBASE_WAIT_MS     = 3_000;   // timeout aguardando Firebase inicializar
 const BACKUP_DEBOUNCE_MS   = 1_500;   // debounce de escrita no Firestore
-const BACKUP_TIMEOUT_MS    = 12_000;  // timeout máximo por operação
+const RESTORE_TIMEOUT_MS   = 4_000;   // timeout do getDoc inicial (< SYNC_FALLBACK_MS=5s)
+const BACKUP_TIMEOUT_MS    = 10_000;  // timeout de escrita (pode ser mais generoso)
 const SNAPSHOT_MIN_GAP_MS  = 2_000;   // ignora snapshots chegando muito rápido (anti-loop)
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -210,7 +211,7 @@ async function _restoreFirestore() {
 
   try {
     const ref  = doc(db, FIRESTORE_COLLECTION, FIRESTORE_DOC_ID);
-    const snap = await _withTimeout(getDoc(ref), BACKUP_TIMEOUT_MS);
+    const snap = await _withTimeout(getDoc(ref), RESTORE_TIMEOUT_MS);
 
     if (snap.exists()) {
       const remote = snap.data()?.data;

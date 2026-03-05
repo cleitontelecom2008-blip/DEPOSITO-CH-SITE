@@ -21,7 +21,7 @@ const CONSTANTS = Object.freeze({
   STORAGE_KEY: 'CH_GELADAS_DB_ENTERPRISE',
   SYNC_LOCK_DURATION_MS: 6_000,
   TOAST_DURATION_MS: 2_800,
-  SYNC_FALLBACK_MS: 5_000,
+  SYNC_FALLBACK_MS: 4_500, // ligeiramente > RESTORE_TIMEOUT_MS (4s) para o Firestore sempre terminar primeiro
   CART_ANIMATION_MS: 400,
   DEBOUNCE_SAVE_MS: 300,
   LOCALE: 'pt-BR',
@@ -1546,10 +1546,14 @@ function salvarZap() {
 }
 
 /** Login assíncrono com PIN */
-async function doLogin() {
-  const pin = Utils.el('pinInput')?.value || '';
+async function doLogin(pinArg) {
+  const pin = pinArg !== undefined ? String(pinArg) : (Utils.el('pinInput')?.value || '');
+  if (!pin) return; // guarda extra: nunca tenta com PIN vazio
   const success = await AuthService.login(pin);
-  if (success) Bootstrap.onLoginSuccess(AuthService.getRole());
+  if (success) {
+    if (typeof window._kpReset === 'function') window._kpReset();
+    Bootstrap.onLoginSuccess(AuthService.getRole());
+  }
 }
 
 /**
