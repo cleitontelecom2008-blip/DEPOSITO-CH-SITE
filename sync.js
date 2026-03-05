@@ -23,6 +23,8 @@ import {
   setDoc,
   getDoc,
   onSnapshot,
+  disableNetwork,
+  enableNetwork,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -245,6 +247,9 @@ async function _restoreFirestore() {
     _isOffline = true;
     ConnectivityUI.set('error');
     console.warn('[Sync] Restore falhou — usando localStorage:', err.message);
+    // Para o SDK imediatamente — sem isto, o getDoc continua em background
+    // a consumir CPU mesmo depois do timeout da Promise
+    try { disableNetwork(db); } catch (_) { /* silencioso */ }
   } finally {
     // CH_INIT SEMPRE executado, independente do resultado
     _callCHInit();
@@ -424,7 +429,9 @@ function _flushImmediate() {
 ═══════════════════════════════════════════════════════════════════ */
 window.addEventListener('ch:connectivity', ({ detail }) => {
   if (detail.online) {
-    // Voltou online: re-inicia listener + faz backup imediato se houver dados
+    // Voltou online: re-habilita SDK + re-inicia listener + backup imediato
+    const db = window.firestoreDB;
+    if (db) { try { enableNetwork(db); } catch (_) { /* silencioso */ } }
     _startRealtimeListener();
     const hasLocal = !!_readLocal();
     if (hasLocal) _executeBackup();
