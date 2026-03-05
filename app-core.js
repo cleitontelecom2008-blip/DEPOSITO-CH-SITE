@@ -1546,14 +1546,10 @@ function salvarZap() {
 }
 
 /** Login assíncrono com PIN */
-async function doLogin(pinArg) {
-  const pin = pinArg !== undefined ? String(pinArg) : (Utils.el('pinInput')?.value || '');
-  if (!pin) return; // guarda extra: nunca tenta com PIN vazio
+async function doLogin() {
+  const pin = Utils.el('pinInput')?.value || '';
   const success = await AuthService.login(pin);
-  if (success) {
-    if (typeof window._kpReset === 'function') window._kpReset();
-    Bootstrap.onLoginSuccess(AuthService.getRole());
-  }
+  if (success) Bootstrap.onLoginSuccess(AuthService.getRole());
 }
 
 /**
