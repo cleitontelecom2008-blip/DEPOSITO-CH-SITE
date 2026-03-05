@@ -1579,11 +1579,26 @@ document.addEventListener('DOMContentLoaded', () => {
     if (_pin.length >= MAX_LEN) return;
     _pin += d;
     _render();
-    if (typeof checkPin === 'function') checkPin(_pin);
+    var len = _pin.length;
+    // PIN de 5 ou 6 dígitos: envia diretamente ao doLogin (sem passar pelo DOM)
+    if ((len === 5 || len === 6) && typeof doLogin === 'function') {
+      doLogin(_pin);
+      return;
+    }
+    // PIN de 3 dígitos (admin): delay para não consumir tentativas prematuramente
+    if (len === 3) {
+      clearTimeout(window._kpTimer);
+      window._kpTimer = setTimeout(function() {
+        if (_pin.length === 3 && typeof doLogin === 'function') doLogin(_pin);
+      }, 600);
+    } else {
+      clearTimeout(window._kpTimer);
+    }
   };
 
   window.kpBack = function() {
     if (_pin.length === 0) return;
+    clearTimeout(window._kpTimer);
     _pin = _pin.slice(0, -1);
     _render();
   };
