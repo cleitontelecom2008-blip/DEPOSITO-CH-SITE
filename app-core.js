@@ -554,6 +554,7 @@ const AuthService = (() => {
       UIService.showToast('PIN Inválido', remaining > 0 ? `${remaining} tentativa(s) restante(s)` : 'Conta bloqueada', 'error');
       const pinEl = Utils.el('pinInput');
       if (pinEl) pinEl.value = '';
+      if (typeof window._kpReset === 'function') window._kpReset();
       return false;
     }
 
@@ -695,73 +696,8 @@ const UIService = (() => {
     if (lock) lock.style.display = 'flex';
     const app = Utils.el('app');
     if (app)  app.style.display  = 'none';
-
-    const pin = Utils.el('pinInput');
-    if (pin) {
-      pin.maxLength = 6;
-
-      // Tenta focar — só funciona se houver gesto do utilizador
-      setTimeout(() => {
-        pin.focus();
-        // Após o attempt de focus, verifica se o teclado realmente abriu
-        setTimeout(() => {
-          if (document.activeElement !== pin) {
-            _showTapToTypeBtn(pin);
-          }
-        }, 150);
-      }, 300);
-
-      // Clique em qualquer ponto do lock também tenta abrir o teclado
-      const lockEl = Utils.el('lock');
-      if (lockEl && !lockEl._tapBound) {
-        lockEl._tapBound = true;
-        lockEl.addEventListener('click', () => {
-          Utils.el('pinInput')?.focus();
-          _removeTapToTypeBtn();
-        });
-      }
-
-      if (!pin._enterBound) {
-        pin._enterBound = true;
-        pin.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
-      }
-    }
-  }
-
-  /* Botão flutuante "Toque para digitar" — aparece quando o foco
-     é bloqueado pelo browser (PWA offline sem gesto do utilizador) */
-  function _showTapToTypeBtn(pin) {
-    if (document.getElementById('_tapToTypeBtn')) return; // já existe
-    const btn = document.createElement('button');
-    btn.id = '_tapToTypeBtn';
-    btn.textContent = '⌨️ Toque para digitar';
-    btn.style.cssText = [
-      'position:fixed',
-      'bottom:40px',
-      'left:50%',
-      'transform:translateX(-50%)',
-      'padding:14px 28px',
-      'font-size:16px',
-      'font-family:inherit',
-      'background:#1a73e8',
-      'color:#fff',
-      'border:none',
-      'border-radius:24px',
-      'box-shadow:0 4px 16px rgba(0,0,0,0.35)',
-      'z-index:99999',
-      'cursor:pointer',
-      'white-space:nowrap',
-    ].join(';');
-    // Este clique É um gesto humano real → o browser permite o focus + teclado
-    btn.addEventListener('click', () => {
-      (pin || Utils.el('pinInput'))?.focus();
-      btn.remove();
-    });
-    document.body.appendChild(btn);
-  }
-
-  function _removeTapToTypeBtn() {
-    document.getElementById('_tapToTypeBtn')?.remove();
+    // Resetar o teclado personalizado ao mostrar o ecrã de bloqueio
+    if (typeof window._kpReset === 'function') window._kpReset();
   }
 
   function showApp() {
