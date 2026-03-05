@@ -506,6 +506,16 @@ const ComandaFechamento = (() => {
 
     _pendingId = cmdId;
 
+    // Reset seção de troco
+    const trocoSection = Utils.el('cmdTrocoSection');
+    if (trocoSection) trocoSection.classList.add('hidden');
+    const trocoInput = Utils.el('cmdTrocoInput');
+    if (trocoInput) trocoInput.value = '';
+    const trocoValor = Utils.el('cmdTrocoValor');
+    if (trocoValor) trocoValor.textContent = 'R$ 0,00';
+    const btnDinheiro = Utils.el('btnCmdDinheiro');
+    if (btnDinheiro) btnDinheiro.classList.remove('ring-2', 'ring-emerald-400');
+
     const nome = Utils.el('cmdFechNome');
     if (nome) nome.textContent = c.nome;
 
@@ -527,7 +537,7 @@ const ComandaFechamento = (() => {
     UIService.openModal('modalCmdFechar');
   }
 
-  function confirmar(formaPgto) {
+  function confirmar(formaPgto, troco) {
     if (!_pendingId) return;
     const id   = _pendingId;
     _pendingId = null;
@@ -537,9 +547,13 @@ const ComandaFechamento = (() => {
     const venda = ComandaService.finalizar(id, formaPgto);
     if (!venda) return;
 
+    const trocoMsg = (troco != null && troco > 0)
+      ? ` · Troco: ${Utils.formatCurrency(troco)}`
+      : '';
+
     UIService.showToast(
       '✅ Conta Fechada!',
-      `${venda.nomeComanda} · ${Utils.formatCurrency(venda.total)} · ${formaPgto}`
+      `${venda.nomeComanda} · ${Utils.formatCurrency(venda.total)} · ${formaPgto}${trocoMsg}`
     );
 
     setTimeout(() => ComandaRenderer.voltarLista(), 300);
@@ -609,6 +623,47 @@ function cmdAbrirFechamento() {
 }
 
 function cmdConfirmarPgto(forma) { ComandaFechamento.confirmar(forma); }
+
+function cmdSelecionarDinheiro() {
+  const section = Utils.el('cmdTrocoSection');
+  if (section) section.classList.remove('hidden');
+  const btn = Utils.el('btnCmdDinheiro');
+  if (btn) btn.classList.add('ring-2', 'ring-emerald-400');
+  const input = Utils.el('cmdTrocoInput');
+  if (input) setTimeout(() => input.focus(), 50);
+  cmdCalcularTroco();
+}
+
+function cmdCalcularTroco() {
+  const totalEl  = Utils.el('cmdFechTotal');
+  const inputEl  = Utils.el('cmdTrocoInput');
+  const trocoEl  = Utils.el('cmdTrocoValor');
+  if (!totalEl || !inputEl || !trocoEl) return;
+
+  const totalStr  = totalEl.textContent.replace(/[^\d,]/g, '').replace(',', '.');
+  const total     = parseFloat(totalStr) || 0;
+  const recebido  = parseFloat(inputEl.value) || 0;
+  const troco     = Math.max(0, recebido - total);
+
+  trocoEl.textContent   = Utils.formatCurrency(troco);
+  trocoEl.style.color   = troco > 0 ? '' : 'var(--tw-text-opacity, #6b7280)';
+}
+
+function cmdConfirmarPgtoDinheiro() {
+  const totalEl  = Utils.el('cmdFechTotal');
+  const inputEl  = Utils.el('cmdTrocoInput');
+  const recebido = parseFloat(inputEl?.value) || 0;
+  const totalStr = totalEl?.textContent.replace(/[^\d,]/g, '').replace(',', '.') || '0';
+  const total    = parseFloat(totalStr) || 0;
+
+  if (recebido > 0 && recebido < total) {
+    UIService.showToast('Atenção', 'Valor recebido menor que o total!', 'error');
+    return;
+  }
+
+  const troco = recebido > 0 ? Math.max(0, recebido - total) : null;
+  ComandaFechamento.confirmar('Dinheiro', troco);
+}
 
 function cmdCancelarById(id) {
   const c = ComandaService.getById(id);

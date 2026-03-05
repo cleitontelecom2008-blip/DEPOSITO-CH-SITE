@@ -1407,10 +1407,31 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
       <p class="text-[10px] text-slate-500 font-bold uppercase text-center pt-1">Forma de pagamento</p>
       <div class="grid grid-cols-2 gap-2">
-        <button onclick="cmdConfirmarPgto('Dinheiro')"   class="py-3 rounded-xl bg-emerald-600/20 text-emerald-300 border border-emerald-500/30 font-black text-xs uppercase hover:bg-emerald-600/40 transition-all active:scale-95"><i class="fas fa-money-bill mr-1"></i>Dinheiro</button>
+        <button id="btnCmdDinheiro" onclick="cmdSelecionarDinheiro()" class="py-3 rounded-xl bg-emerald-600/20 text-emerald-300 border border-emerald-500/30 font-black text-xs uppercase hover:bg-emerald-600/40 transition-all active:scale-95"><i class="fas fa-money-bill mr-1"></i>Dinheiro</button>
         <button onclick="cmdConfirmarPgto('Pix')"        class="py-3 rounded-xl bg-blue-600/20 text-blue-300 border border-blue-500/30 font-black text-xs uppercase hover:bg-blue-600/40 transition-all active:scale-95"><i class="fas fa-qrcode mr-1"></i>Pix</button>
         <button onclick="cmdConfirmarPgto('Débito')"     class="py-3 rounded-xl bg-purple-600/20 text-purple-300 border border-purple-500/30 font-black text-xs uppercase hover:bg-purple-600/40 transition-all active:scale-95"><i class="fas fa-credit-card mr-1"></i>Débito</button>
         <button onclick="cmdConfirmarPgto('Crédito')"    class="py-3 rounded-xl bg-amber-600/20 text-amber-300 border border-amber-500/30 font-black text-xs uppercase hover:bg-amber-600/40 transition-all active:scale-95"><i class="fas fa-credit-card mr-1"></i>Crédito</button>
+      </div>
+
+      <!-- Seção Troco — aparece ao selecionar Dinheiro -->
+      <div id="cmdTrocoSection" class="hidden bg-emerald-950/40 border border-emerald-500/20 rounded-xl p-3 space-y-2">
+        <p class="text-[10px] font-black uppercase text-emerald-400 flex items-center gap-1">
+          <i class="fas fa-coins"></i> Troco
+        </p>
+        <div class="flex items-center gap-2">
+          <label class="text-[10px] text-slate-400 font-bold whitespace-nowrap">Valor recebido</label>
+          <input id="cmdTrocoInput" type="number" min="0" step="0.01" placeholder="0,00"
+            oninput="cmdCalcularTroco()"
+            class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs font-black text-white text-right focus:outline-none focus:border-emerald-500 transition-colors" />
+        </div>
+        <div class="flex justify-between items-center">
+          <span class="text-[10px] text-slate-500 font-bold uppercase">Troco</span>
+          <span id="cmdTrocoValor" class="text-base font-black text-emerald-400">R$ 0,00</span>
+        </div>
+        <button onclick="cmdConfirmarPgtoDinheiro()"
+          class="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase transition-all active:scale-95">
+          <i class="fas fa-check mr-1"></i> Confirmar Dinheiro
+        </button>
       </div>
     </div>
   </div>
@@ -1459,7 +1480,6 @@ document.addEventListener('DOMContentLoaded', () => {
 <script src="app-delivery.js"></script>
 <script src="app-ponto.js"></script>
 <script src="app-comanda.js"></script>
-  <script src="app-troco.js"></script>
 
 <!-- ═══════════════ Service Worker ═══════════════ -->
 <script>
