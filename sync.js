@@ -184,6 +184,18 @@ function _callCHInit() {
    RESTORE — Firestore → localStorage (executa uma vez no boot)
 ═══════════════════════════════════════════════════════════════════ */
 async function _restoreFirestore() {
+  // ── Fast-path offline ──────────────────────────────────────────────
+  // Se o dispositivo já está offline ao arrancar, não há razão para aguardar
+  // o Firebase SDK nem tentar o getDoc (que bloquearia 12 s e consumiria CPU).
+  // O listener real-time é omitido: voltará a ligar via 'ch:connectivity' → online.
+  if (!navigator.onLine) {
+    _isOffline = true;
+    ConnectivityUI.set('offline');
+    console.warn('[Sync] Dispositivo offline — boot direto do localStorage');
+    _callCHInit();
+    return;
+  }
+
   ConnectivityUI.set('syncing');
 
   const db = await _waitFirebase();
@@ -235,8 +247,8 @@ async function _restoreFirestore() {
   } finally {
     // CH_INIT SEMPRE executado, independente do resultado
     _callCHInit();
-    // Inicia listener real-time APÓS o restore (evita loop de init)
-    _startRealtimeListener();
+    // Listener real-time apenas se online — offline, aguarda 'ch:connectivity' → online
+    if (!_isOffline) _startRealtimeListener();
   }
 }
 
@@ -299,8 +311,10 @@ async function _startRealtimeListener() {
         ConnectivityUI.set('error');
         console.warn('[Sync] onSnapshot erro:', err.message);
 
-        // Tenta reconectar em 30s
-        setTimeout(_startRealtimeListener, 30_000);
+        // Não agenda retry se já offline — 'ch:connectivity' → online trata o reconect
+        if (navigator.onLine) {
+          setTimeout(_startRealtimeListener, 30_000);
+        }
       }
     );
 
